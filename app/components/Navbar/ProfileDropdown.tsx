@@ -13,8 +13,8 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@/app/components/ui/avatar";
-// import { logout } from "@/actions/auth.action";
 import Link from "next/link";
+import { logout } from "@/app/actions/action.auth";
 
 type Props = {
 	name: string | null | undefined;
@@ -51,7 +51,7 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
 					</DropdownMenuItem>
 				</Link>
 				<DropdownMenuItem
-					// onClick={() => logout()}
+					onClick={() => logout()}
 					className="cursor-pointer text-red-600">
 					Logout
 				</DropdownMenuItem>
