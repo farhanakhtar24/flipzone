@@ -1,9 +1,6 @@
 import React from "react";
-import { Button } from "./components/ui/button";
 
-type Props = {};
-
-const page = (props: Props) => {
+const page = () => {
 	return <div className=""></div>;
 };
 
