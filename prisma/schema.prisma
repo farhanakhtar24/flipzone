@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  role          UserRole  @default(USER) // 'user' or 'admin'
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  cart          Cart[]
+  orders        Order[]
+  accounts      Account[]
+}
+
+model Category {
+  id       String            @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  products ProductCategory[]
+}
+
+model Tag {
+  id       String       @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  products ProductTag[]
+}
+
+model Product {
+  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  title                String
+  description          String?
+  price                Int // Store in cents (e.g., 1000 = $10.00)
+  discountPercentage   Float?
+  rating               Float?
+  stock                Int
+  brand                String?
+  sku                  String?
+  weight               Float?
+  dimensions           Dimensions?
+  warrantyInformation  String?
+  shippingInformation  String?
+  availabilityStatus   String?
+  reviews              Review[]
+  returnPolicy         String?
+  minimumOrderQuantity Int?
+  meta                 MetaData
+  images               String[] // URLs for images
+  thumbnail            String // URL for thumbnail image
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  categories           ProductCategory[] // Explicit many-to-many with Category
+  tags                 ProductTag[] // Explicit many-to-many with Tag
+  CartItem             CartItem[]
+}
+
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String     @db.ObjectId
+  user      User       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  cartId    String  @db.ObjectId
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  Order     Order?  @relation(fields: [orderId], references: [id])
+  orderId   String? @db.ObjectId
+}
+
+model Order {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String      @db.ObjectId
+  user        User        @relation(fields: [userId], references: [id])
+  orderItems  CartItem[]
+  total       Int // Store in cents
+  orderStatus OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Account {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id])
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model ProductCategory {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId  String   @db.ObjectId
+  product    Product  @relation(fields: [productId], references: [id])
+  categoryId String   @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+model ProductTag {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+  tagId     String  @db.ObjectId
+  tag       Tag     @relation(fields: [tagId], references: [id])
+}
+
+type Dimensions {
+  width  Float
+  height Float
+  depth  Float
+}
+
+type Review {
+  rating        Float
+  comment       String
+  date          DateTime
+  reviewerName  String
+  reviewerEmail String
+}
+
+type MetaData {
+  barcode   String
+  qrCode    String
+  createdAt DateTime
+  updatedAt DateTime
+}
