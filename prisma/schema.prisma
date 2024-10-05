@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -27,36 +21,34 @@ enum UserRole {
 
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
   email         String    @unique
-  role          UserRole  @default(USER) // 'user' or 'admin'
-  emailVerified DateTime? @map("email_verified")
-  image         String?
   password      String?
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+  emailVerified DateTime? @map("email_verified")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  cart          Cart[]
-  orders        Order[]
-  accounts      Account[]
+
+  // Relationships
+  cart     Cart?
+  orders   Order[]
+  accounts Account[]
 }
 
 model Category {
-  id       String            @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  // Relationships
   products ProductCategory[]
 }
 
-model Tag {
-  id       String       @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  products ProductTag[]
-}
-
 model Product {
-  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
   title                String
   description          String?
-  price                Int // Store in cents (e.g., 1000 = $10.00)
+  price                Int // Stored in cents
   discountPercentage   Float?
   rating               Float?
   stock                Int
@@ -67,86 +59,101 @@ model Product {
   warrantyInformation  String?
   shippingInformation  String?
   availabilityStatus   String?
-  reviews              Review[]
   returnPolicy         String?
   minimumOrderQuantity Int?
-  meta                 MetaData
-  images               String[] // URLs for images
-  thumbnail            String // URL for thumbnail image
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  categories           ProductCategory[] // Explicit many-to-many with Category
-  tags                 ProductTag[] // Explicit many-to-many with Tag
-  CartItem             CartItem[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  // Tags
+  tags String[] // Changed to a string array for tags
+
+  // Relationships
+  images     String[] // URLs for images
+  thumbnail  String // URL for thumbnail image
+  categories ProductCategory[] // Many-to-many with Category
+  cartItems  CartItem[] // Changed to plural for consistency
+  orderItems OrderedItem[] // Changed to plural for consistency
 }
 
 model Cart {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String     @db.ObjectId
-  user      User       @relation(fields: [userId], references: [id])
-  cartItems CartItem[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user  User       @relation(fields: [userId], references: [id])
+  items CartItem[] // Renamed from 'cartItems' to 'items' for simplicity
 }
 
 model CartItem {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+
+  // Relationships
   cartId    String  @db.ObjectId
   cart      Cart    @relation(fields: [cartId], references: [id])
   productId String  @db.ObjectId
   product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  Order     Order?  @relation(fields: [orderId], references: [id])
-  orderId   String? @db.ObjectId
+}
+
+model OrderedItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+
+  // Relationships
+  orderId   String  @db.ObjectId
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Order {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String      @db.ObjectId
-  user        User        @relation(fields: [userId], references: [id])
-  orderItems  CartItem[]
-  total       Int // Store in cents
-  orderStatus OrderStatus @default(PENDING)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  total     Int // Stored in cents
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Relationships
+  userId String        @db.ObjectId
+  user   User          @relation(fields: [userId], references: [id])
+  items  OrderedItem[] // Renamed from 'orderItems' to 'items' for simplicity
 }
 
 model Account {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String   @db.ObjectId
-  user              User     @relation(fields: [userId], references: [id])
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
+  refreshToken      String?  @map("refresh_token") // Renamed with camelCase
+  accessToken       String?  @map("access_token") // Renamed with camelCase
+  expiresAt         Int?     @map("expires_at") // Renamed with camelCase
+  tokenType         String?  @map("token_type") // Renamed with camelCase
   scope             String?
-  id_token          String?
-  session_state     String?
+  idToken           String?  @map("id_token") // Renamed with camelCase
+  sessionState      String?  @map("session_state") // Renamed with camelCase
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  // Relationships
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerAccountId])
 }
 
 model ProductCategory {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Relationships
   productId  String   @db.ObjectId
   product    Product  @relation(fields: [productId], references: [id])
   categoryId String   @db.ObjectId
   category   Category @relation(fields: [categoryId], references: [id])
 }
 
-model ProductTag {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
-  tagId     String  @db.ObjectId
-  tag       Tag     @relation(fields: [tagId], references: [id])
-}
-
+// Custom types for better structure
 type Dimensions {
   width  Float
   height Float
