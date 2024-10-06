@@ -14,7 +14,7 @@ import { Label } from "@/app/components/ui/label";
 import { TabsContent } from "@/app/components/ui/tabs";
 import { Separator } from "@/app/components/ui/separator";
 import GithubSignInBtn from "./GithubSignInBtn";
-// import { loginWithCreds } from "@/app/actions/action.auth";
+import { loginWithCreds } from "@/app/actions/auth/auth.action";
 // import Spinner from "@/components/Spinner/Spinner";
 
 const SignInTab = () => {
@@ -24,7 +24,7 @@ const SignInTab = () => {
 
 	const handleSignIn = async () => {
 		setLoading(true);
-		// await loginWithCreds(email, password);
+		await loginWithCreds(email, password);
 		setLoading(false);
 	};
 

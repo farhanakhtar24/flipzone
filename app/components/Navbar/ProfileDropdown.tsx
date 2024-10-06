@@ -14,7 +14,7 @@ import {
 	AvatarImage,
 } from "@/app/components/ui/avatar";
 import Link from "next/link";
-import { logout } from "@/app/actions/action.auth";
+import { logout } from "@/app/actions/auth/auth.action";
 
 type Props = {
 	name: string | null | undefined;

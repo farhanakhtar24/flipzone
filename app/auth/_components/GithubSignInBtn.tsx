@@ -1,6 +1,5 @@
 "use client";
-import { login } from "@/app/actions/action.auth";
-// import { login } from "@/actions/auth.action";
+import { login } from "@/app/actions/auth/auth.action";
 // import Spinner from "@/app/components/Spinner/Spinner";
 import { Button } from "@/app/components/ui/button";
 import React, { useState } from "react";

@@ -12,10 +12,10 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { TabsContent } from "@/app/components/ui/tabs";
-// import { signUp } from "@/actions/post/signUp.action";
 // import Spinner from "@/app/components/Spinner/Spinner";
 import { useToast } from "@/app/hooks/use-toast";
 import { ToastAction } from "@/app/components/ui/toast";
+import { signUp } from "@/app/actions/auth/signUp.action";
 
 // type Props = {};
 
@@ -28,7 +28,7 @@ const SignUpTab = () => {
 
 	const handleSignUp = async () => {
 		setLoading(true);
-		// await signUp(name, email, password);
+		await signUp(name, email, password);
 		toast({
 			title: "Registration successful.",
 			description: "You have been successfully registered.",
