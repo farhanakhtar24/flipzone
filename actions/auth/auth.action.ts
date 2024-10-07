@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from "@/app/util/auth";
+import { signIn, signOut } from "@/util/auth";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { getUserByEmail } from "../get/getUserByEmail.action";

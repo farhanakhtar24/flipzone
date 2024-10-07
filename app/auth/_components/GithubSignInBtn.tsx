@@ -1,7 +1,7 @@
 "use client";
-import { login } from "@/app/actions/auth/auth.action";
+import { login } from "@/actions/auth/auth.action";
+import { Button } from "@/components/ui/button";
 // import Spinner from "@/app/components/Spinner/Spinner";
-import { Button } from "@/app/components/ui/button";
 import React, { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 

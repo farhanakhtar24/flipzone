@@ -1,7 +1,7 @@
 import React from "react";
 import SignInTab from "./SignInTab";
-import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import SignUpTab from "./SignUpTab";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AuthTabs = () => {
   return (

@@ -1,4 +1,4 @@
-import { auth } from "@/app/util/auth";
+import { auth } from "@/auth";
 import Link from "next/link";
 import logo from "@/public/assets/logo_light.png";
 import Image from "next/image";
