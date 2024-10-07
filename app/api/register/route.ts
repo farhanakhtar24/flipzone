@@ -4,30 +4,30 @@ import { saltAndHashPassword } from "@/app/util/helper";
 import { getUserByEmail } from "@/app/actions/get/getUserByEmail.action";
 
 export async function POST(request: Request) {
-	const body = await request.json();
-	const { name, email, password } = body;
+  const body = await request.json();
+  const { name, email, password } = body;
 
-	const user = await getUserByEmail(email);
+  const user = await getUserByEmail(email);
 
-	if (user) {
-		return NextResponse.json({
-			message: "User already exists!",
-			status: 400,
-		});
-	}
+  if (user) {
+    return NextResponse.json({
+      message: "User already exists!",
+      status: 400,
+    });
+  }
 
-	const hashedPassword = saltAndHashPassword(password);
+  const hashedPassword = saltAndHashPassword(password);
 
-	await db.user.create({
-		data: {
-			email,
-			name,
-			password: hashedPassword,
-		},
-	});
+  await db.user.create({
+    data: {
+      email,
+      name,
+      password: hashedPassword,
+    },
+  });
 
-	return NextResponse.json({
-		status: 200,
-		message: "User created successfully!",
-	});
+  return NextResponse.json({
+    status: 200,
+    message: "User created successfully!",
+  });
 }
