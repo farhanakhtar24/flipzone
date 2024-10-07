@@ -113,7 +113,7 @@ const SignUpTab = () => {
             </CardContent>
             <CardFooter className="flex flex-col gap-6">
               <Button
-                className="flex w-full gap-2"
+                className="flex w-full gap-2 bg-blue-700 hover:bg-blue-600/85"
                 disabled={loading || !form.formState.isValid}
                 type="submit"
               >
