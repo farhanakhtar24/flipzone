@@ -126,19 +126,19 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refreshToken      String?  @map("refresh_token") // Renamed with camelCase
-  accessToken       String?  @map("access_token") // Renamed with camelCase
-  expiresAt         Int?     @map("expires_at") // Renamed with camelCase
-  tokenType         String?  @map("token_type") // Renamed with camelCase
+  refresh_token     String?  @db.String
+  access_token      String?  @db.String
+  expires_at        Int?
+  token_type        String?
   scope             String?
-  idToken           String?  @map("id_token") // Renamed with camelCase
-  sessionState      String?  @map("session_state") // Renamed with camelCase
+  id_token          String?  @db.String
+  session_state     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relationships
   userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }

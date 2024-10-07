@@ -1,9 +1,11 @@
 "use server";
 
-import { signIn, signOut } from "@/util/auth";
+import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { getUserByEmail } from "../get/getUserByEmail.action";
+import * as z from "zod";
+import { LoginSchema } from "@/schemas/auth";
 
 export const login = async (provider: string) => {
   await signIn(provider, {
@@ -20,7 +22,15 @@ export const logout = async () => {
   revalidatePath("/", "layout");
 };
 
-export const loginWithCreds = async (email: string, password: string) => {
+export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
+  const validatedFields = LoginSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid credentials!" };
+  }
+
+  const { email, password } = validatedFields.data;
+
   const existingUser = await getUserByEmail(email);
 
   if (!existingUser) {

@@ -1,22 +1,20 @@
-"use client";
 import { login } from "@/actions/auth/auth.action";
 import { Button } from "@/components/ui/button";
-// import Spinner from "@/app/components/Spinner/Spinner";
 import React, { useState } from "react";
-import { FaGithub } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
-const GithubSignInBtn = () => {
+const GoogleSignInBtn = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
     setLoading(true);
-    await login("github");
+    await login("google");
     setLoading(false);
   };
 
   return (
     <Button
-      className="flex w-full items-center justify-center gap-2 text-slate-800"
+      className="flex w-full items-center justify-center gap-2"
       onClick={handleSignIn}
       disabled={loading}
       variant="outline"
@@ -27,10 +25,10 @@ const GithubSignInBtn = () => {
           loading...
         </div>
       ) : (
-        <FaGithub className="text-lg" />
+        <FcGoogle className="text-lg" />
       )}
     </Button>
   );
 };
 
-export default GithubSignInBtn;
+export default GoogleSignInBtn;

@@ -1,6 +1,15 @@
 import axios from "axios";
 import { loginWithCreds } from "./auth.action";
-export const signUp = async (name: string, email: string, password: string) => {
+import { SignUpSchema } from "@/schemas/auth";
+import { z } from "zod";
+export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
+  const validatedFields = SignUpSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid credentials!" };
+  }
+
+  const { email, password, name } = validatedFields.data;
   try {
     await axios.post("/api/register", {
       name,
@@ -8,7 +17,7 @@ export const signUp = async (name: string, email: string, password: string) => {
       password,
     });
 
-    await loginWithCreds(email, password);
+    await loginWithCreds(values);
   } catch (error) {
     console.log(error);
   }
