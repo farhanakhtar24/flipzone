@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { auth } from "@/auth";
+import authConfig from "@/auth.config";
+import NextAuth from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 const protectedRoutes = ["/middleware"];
 
-export default async function middleware(request: NextRequest) {
+const { auth } = NextAuth(authConfig);
+
+export default auth(async function middleware(request: NextRequest) {
   const session = await auth();
 
   const isProtected = protectedRoutes.some((route) =>
@@ -17,7 +19,8 @@ export default async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
+
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params

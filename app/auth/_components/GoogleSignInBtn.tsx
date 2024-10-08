@@ -1,5 +1,6 @@
 import { login } from "@/actions/auth/auth.action";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 
@@ -21,8 +22,7 @@ const GoogleSignInBtn = () => {
     >
       {loading ? (
         <div className="h-5 w-5">
-          {/* <Spinner /> */}
-          loading...
+          <Spinner />
         </div>
       ) : (
         <FcGoogle className="text-lg" />

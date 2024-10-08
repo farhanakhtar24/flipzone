@@ -1,7 +1,7 @@
 "use client";
 import { login } from "@/actions/auth/auth.action";
 import { Button } from "@/components/ui/button";
-// import Spinner from "@/app/components/Spinner/Spinner";
+import Spinner from "@/components/ui/spinner";
 import React, { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 
@@ -23,8 +23,7 @@ const GithubSignInBtn = () => {
     >
       {loading ? (
         <div className="h-5 w-5">
-          {/* <Spinner /> */}
-          loading...
+          <Spinner />
         </div>
       ) : (
         <FaGithub className="text-lg" />

@@ -19,6 +19,6 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
 
     await loginWithCreds(values);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
