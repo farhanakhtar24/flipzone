@@ -5,6 +5,7 @@ import Image from "next/image";
 import ProfileDropdown from "./ProfileDropdown";
 import { Button } from "../ui/button";
 import SearchBar from "./SearchBar";
+import { PAGE_ROUTES } from "@/routes";
 
 const Navbar = async () => {
   const session = await auth();
@@ -23,7 +24,7 @@ const Navbar = async () => {
 
         <div className="flex w-full items-center justify-end gap-5">
           {!session?.user ? (
-            <Link href="/auth">
+            <Link href={PAGE_ROUTES.AUTH}>
               <Button className="bg-blue-600 text-white hover:bg-blue-500">
                 Login
               </Button>

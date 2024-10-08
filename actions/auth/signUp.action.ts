@@ -3,6 +3,7 @@ import { loginWithCreds } from "./auth.action";
 import { SignUpSchema } from "@/schemas/auth";
 import { z } from "zod";
 import { AuthError } from "next-auth";
+import { API_ROUTES } from "@/routes";
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   const validatedFields = SignUpSchema.safeParse(values);
 
@@ -12,7 +13,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
 
   const { email, password, name } = validatedFields.data;
   try {
-    await axios.post("/api/register", {
+    await axios.post(API_ROUTES.REGISTER, {
       name,
       email,
       password,

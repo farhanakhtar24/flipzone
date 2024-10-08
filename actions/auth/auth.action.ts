@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getUserByEmail } from "../get/getUserByEmail.action";
 import * as z from "zod";
 import { LoginSchema } from "@/schemas/auth";
+import { PAGE_ROUTES } from "@/routes";
 
 export const login = async (provider: string) => {
   await signIn(provider, {
@@ -16,7 +17,7 @@ export const login = async (provider: string) => {
 
 export const logout = async () => {
   await signOut({
-    redirectTo: "/auth",
+    redirectTo: PAGE_ROUTES.AUTH,
   });
 
   revalidatePath("/", "layout");

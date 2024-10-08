@@ -1,6 +1,7 @@
 import authConfig from "@/auth.config";
 import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { PAGE_ROUTES } from "./routes";
 
 const protectedRoutes = ["/middleware"];
 
@@ -14,7 +15,7 @@ export default auth(async function middleware(request: NextRequest) {
   );
 
   if (isProtected && !session?.user) {
-    const absoluteURL = new URL("/auth", request.nextUrl.origin);
+    const absoluteURL = new URL(PAGE_ROUTES.AUTH, request.nextUrl.origin);
     return NextResponse.redirect(absoluteURL.toString());
   }
 
