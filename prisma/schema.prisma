@@ -77,13 +77,16 @@ model Product {
   minimumOrderQuantity Int?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
+  reviews              Review[]
+  meta                 MetaData?
 
   // Tags
   tags String[] // Changed to a string array for tags
 
   // Relationships
-  images     String[] // URLs for images
-  thumbnail  String // URL for thumbnail image
+  images    String[] // URLs for images
+  thumbnail String // URL for thumbnail image
+
   categories ProductCategory[] // Many-to-many with Category
   cartItems  CartItem[] // Changed to plural for consistency
   orderItems OrderedItem[] // Changed to plural for consistency
@@ -91,7 +94,7 @@ model Product {
 
 model Category {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  name String @unique
 
   // Relationships
   products ProductCategory[]
