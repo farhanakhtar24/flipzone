@@ -49,7 +49,7 @@ export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
         case "CallbackRouteError":
           return { error: "Invalid password!" };
         default:
-          return { error: "Something went wrong!" };
+          return { error: error.message };
       }
     }
 

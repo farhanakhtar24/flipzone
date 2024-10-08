@@ -2,6 +2,7 @@ import axios from "axios";
 import { loginWithCreds } from "./auth.action";
 import { SignUpSchema } from "@/schemas/auth";
 import { z } from "zod";
+import { AuthError } from "next-auth";
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   const validatedFields = SignUpSchema.safeParse(values);
 
@@ -18,7 +19,11 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
     });
 
     await loginWithCreds(values);
-  } catch (error) {
-    console.error(error);
+  } catch (error: unknown | AuthError) {
+    if (error instanceof AuthError) {
+      return { error: error.message };
+    }
+
+    throw error;
   }
 };

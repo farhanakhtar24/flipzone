@@ -27,11 +27,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Spinner from "@/components/ui/spinner";
+import FormError from "@/components/ui/form-error";
 
 // type Props = {};
 
 const SignUpTab = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof SignUpSchema>>({
@@ -45,13 +47,20 @@ const SignUpTab = () => {
 
   const handleSignUp = async (values: z.infer<typeof SignUpSchema>) => {
     setLoading(true);
-    await signUp(values);
-    toast({
-      title: "Registration successful.",
-      description: "You have been successfully registered.",
-      variant: "default",
-      action: <ToastAction altText="Close">Close</ToastAction>,
-    });
+
+    const res = await signUp(values);
+
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      toast({
+        title: "Registration successful.",
+        description: "You have been successfully registered.",
+        variant: "default",
+        action: <ToastAction altText="Close">Close</ToastAction>,
+      });
+    }
+
     setLoading(false);
   };
 
@@ -110,6 +119,7 @@ const SignUpTab = () => {
                   </FormItem>
                 )}
               />
+              <FormError message={error} />
             </CardContent>
             <CardFooter className="flex flex-col gap-6">
               <Button
