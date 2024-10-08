@@ -36,12 +36,26 @@ model User {
   accounts Account[]
 }
 
-model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+model Account {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.String
+  access_token      String?  @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.String
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relationships
-  products ProductCategory[]
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model Product {
@@ -73,6 +87,14 @@ model Product {
   categories ProductCategory[] // Many-to-many with Category
   cartItems  CartItem[] // Changed to plural for consistency
   orderItems OrderedItem[] // Changed to plural for consistency
+}
+
+model Category {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  // Relationships
+  products ProductCategory[]
 }
 
 model Cart {
@@ -119,28 +141,6 @@ model Order {
   userId String        @db.ObjectId
   user   User          @relation(fields: [userId], references: [id])
   items  OrderedItem[] // Renamed from 'orderItems' to 'items' for simplicity
-}
-
-model Account {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?  @db.String
-  access_token      String?  @db.String
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?  @db.String
-  session_state     String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // Relationships
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
 }
 
 model ProductCategory {
