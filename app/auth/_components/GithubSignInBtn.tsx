@@ -23,7 +23,7 @@ const GithubSignInBtn = () => {
     >
       {loading ? (
         <div className="h-5 w-5">
-          <Spinner />
+          <Spinner className="text-slate-800" />
         </div>
       ) : (
         <FaGithub className="text-lg" />

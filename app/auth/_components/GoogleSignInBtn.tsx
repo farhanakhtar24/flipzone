@@ -22,7 +22,7 @@ const GoogleSignInBtn = () => {
     >
       {loading ? (
         <div className="h-5 w-5">
-          <Spinner />
+          <Spinner className="text-slate-800" />
         </div>
       ) : (
         <FcGoogle className="text-lg" />
