@@ -28,9 +28,11 @@ import {
 } from "@/components/ui/form";
 import GoogleSignInBtn from "./GoogleSignInBtn";
 import Spinner from "@/components/ui/spinner";
+import FormError from "@/components/ui/form-error";
 
 const SignInTab = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -42,7 +44,12 @@ const SignInTab = () => {
 
   const handleSignIn = async (values: z.infer<typeof LoginSchema>) => {
     setLoading(true);
-    await loginWithCreds(values);
+    const res = await loginWithCreds(values);
+
+    if (res?.error) {
+      setError(res.error);
+    }
+
     setLoading(false);
   };
 
@@ -91,6 +98,7 @@ const SignInTab = () => {
                   </FormItem>
                 )}
               />
+              <FormError message={error} />
               <Button
                 className="flex w-full gap-2 bg-blue-700 hover:bg-blue-600/85"
                 disabled={loading || !form.formState.isValid}

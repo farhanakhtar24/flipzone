@@ -34,7 +34,7 @@ export default {
         const user = await getUserByEmail(email);
 
         if (!user) {
-          throw new Error("No user found.");
+          throw new Error("User not found");
         }
 
         const isMatch = bcrypt.compareSync(
@@ -43,7 +43,7 @@ export default {
         );
 
         if (!isMatch) {
-          throw new Error("Incorrect password");
+          throw new Error("Invalid password");
         }
 
         return user;
