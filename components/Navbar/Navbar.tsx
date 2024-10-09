@@ -6,6 +6,7 @@ import ProfileDropdown from "./ProfileDropdown";
 import { Button } from "../ui/button";
 import SearchBar from "./SearchBar";
 import { PAGE_ROUTES } from "@/routes";
+import { NavLinks } from "@/constant/NavLinks";
 
 const Navbar = async () => {
   const session = await auth();
@@ -32,10 +33,10 @@ const Navbar = async () => {
           ) : (
             <>
               <SearchBar />
-              <Link href="/all-products" className="font-semibold">
+              <Link href={NavLinks.allProducts} className="font-semibold">
                 All Products
               </Link>
-              <Link href="/product/category" className="font-semibold">
+              <Link href={NavLinks.categories} className="font-semibold">
                 Categories
               </Link>
               <ProfileDropdown
