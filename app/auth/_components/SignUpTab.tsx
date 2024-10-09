@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { signUp } from "@/actions/auth/auth.action";
+import { signUp } from "@/actions/auth.action";
 import { Button } from "@/components/ui/button";
 import {
   Card,

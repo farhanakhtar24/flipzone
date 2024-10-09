@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import GithubSignInBtn from "./GithubSignInBtn";
-import { loginWithCreds } from "@/actions/auth/auth.action";
+import { loginWithCreds } from "@/actions/auth.action";
 import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {

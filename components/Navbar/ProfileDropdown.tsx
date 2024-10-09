@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { logout } from "@/actions/auth/auth.action";
+import { logout } from "@/actions/auth.action";
 
 type Props = {
   name: string | null | undefined;

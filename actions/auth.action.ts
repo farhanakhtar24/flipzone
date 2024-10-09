@@ -3,7 +3,7 @@
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
-import { getUserByEmail } from "../get/user.action";
+import { getUserByEmail } from "./user.action";
 import * as z from "zod";
 import { LoginSchema, SignUpSchema } from "@/schemas/auth";
 import { API_ROUTES, PAGE_ROUTES } from "@/routes";

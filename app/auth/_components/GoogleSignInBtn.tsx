@@ -1,4 +1,4 @@
-import { login } from "@/actions/auth/auth.action";
+import { login } from "@/actions/auth.action";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
 import React, { useState } from "react";
