@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { NextResponse } from "next/server";
 import { saltAndHashPassword } from "@/util/helper";
-import { getUserByEmail } from "@/actions/get/getUserByEmail.action";
+import { getUserByEmail } from "@/actions/get/user.action";
 
 export async function POST(request: Request) {
   const body = await request.json();

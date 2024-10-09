@@ -3,10 +3,11 @@
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
-import { getUserByEmail } from "../get/getUserByEmail.action";
+import { getUserByEmail } from "../get/user.action";
 import * as z from "zod";
-import { LoginSchema } from "@/schemas/auth";
-import { PAGE_ROUTES } from "@/routes";
+import { LoginSchema, SignUpSchema } from "@/schemas/auth";
+import { API_ROUTES, PAGE_ROUTES } from "@/routes";
+import { apiClient } from "@/util/axios";
 
 export const login = async (provider: string) => {
   await signIn(provider, {
@@ -58,4 +59,29 @@ export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
   }
 
   revalidatePath("/", "layout");
+};
+
+export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
+  const validatedFields = SignUpSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid credentials!" };
+  }
+
+  const { email, password, name } = validatedFields.data;
+  try {
+    await apiClient.post(API_ROUTES.REGISTER, {
+      name,
+      email,
+      password,
+    });
+
+    await loginWithCreds(values);
+  } catch (error: unknown | AuthError) {
+    if (error instanceof AuthError) {
+      return { error: error.message };
+    }
+
+    throw error;
+  }
 };
