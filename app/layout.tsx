@@ -34,7 +34,7 @@ export default function RootLayout({
         >
           <NextTopLoader />
           <Navbar />
-          <main className="min-h-[88vh] overflow-auto bg-slate-50">
+          <main className="min-h-[88vh] overflow-y-auto bg-slate-50">
             <div className="flex h-full w-full items-center justify-center py-10">
               {children}
             </div>
