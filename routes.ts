@@ -1,6 +1,6 @@
 export const PAGE_ROUTES = {
   AUTH: "/auth",
-  ALL_PRODUCTS: "/all-products",
+  PRODUCTS: "/products",
   CATEGORIES: "/categories",
   CART: "/cart",
   ORDERS: "/orders",

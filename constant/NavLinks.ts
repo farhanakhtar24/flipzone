@@ -1,7 +1,7 @@
 import { PAGE_ROUTES } from "@/routes";
 
 export const NavLinks = {
-  allProducts: PAGE_ROUTES.ALL_PRODUCTS,
+  products: PAGE_ROUTES.PRODUCTS,
   categories: PAGE_ROUTES.CATEGORIES,
   cart: PAGE_ROUTES.CART,
   orders: PAGE_ROUTES.ORDERS,

@@ -33,7 +33,7 @@ const Navbar = async () => {
           ) : (
             <>
               <SearchBar />
-              <Link href={NavLinks.allProducts} className="font-semibold">
+              <Link href={NavLinks.products} className="font-semibold">
                 All Products
               </Link>
               <Link href={NavLinks.categories} className="font-semibold">
