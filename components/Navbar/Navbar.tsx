@@ -11,7 +11,7 @@ import { NavLinks } from "@/constant/NavLinks";
 const Navbar = async () => {
   const session = await auth();
   return (
-    <nav className="sticky top-0 flex w-full items-center border-b bg-background px-5 xl:px-0">
+    <nav className="sticky top-0 z-50 flex w-full items-center border-b bg-background px-5 xl:px-0">
       <div className="mx-auto my-2 flex w-full max-w-screen-xl items-center justify-between">
         <Link className="font-bold" href="/">
           <Image

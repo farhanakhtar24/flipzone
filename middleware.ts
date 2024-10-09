@@ -3,7 +3,12 @@ import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { PAGE_ROUTES } from "./routes";
 
-const protectedRoutes = ["/middleware"];
+const protectedRoutes = [
+  PAGE_ROUTES.CART,
+  PAGE_ROUTES.CATEGORIES,
+  PAGE_ROUTES.ORDERS,
+  PAGE_ROUTES.PRODUCTS,
+];
 
 const { auth } = NextAuth(authConfig);
 

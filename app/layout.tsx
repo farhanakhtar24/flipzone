@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionContext from "@/context/SessionContext";
 import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,6 +39,7 @@ export default function RootLayout({
             <div className="flex h-full w-full items-center justify-center py-10">
               {children}
             </div>
+            <Toaster />
           </main>
         </body>
       </html>

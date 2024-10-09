@@ -1,12 +1,34 @@
 import { getAllProducts } from "@/actions/product.action";
 import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
+import ProductGrid from "./_components/ProductGrid";
 
 const page = async () => {
-  const products = await getAllProducts();
+  const { data, error, message } = await getAllProducts();
+
+  if (error) {
+    return (
+      <Wrapper>
+        <div>{error}</div>
+      </Wrapper>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Wrapper>
+        <div>No products found</div>
+      </Wrapper>
+    );
+  }
+
+  if (message) {
+    console.log("message :", message);
+  }
+
   return (
     <Wrapper>
-      <div className="flex w-full flex-col flex-wrap">{}</div>
+      <ProductGrid products={data} />
     </Wrapper>
   );
 };
