@@ -10,9 +10,13 @@ type Props = {
 
 const ProductPage = ({ product }: Props) => {
   return (
-    <Card className="flex h-full w-full bg-white p-5">
-      <PhotoSection product={product} />
-      <DetailsSection product={product} />
+    <Card className="flex h-full w-full gap-5 bg-white p-5">
+      <div className="flex-shrink">
+        <PhotoSection product={product} />
+      </div>
+      <div className="flex-grow">
+        <DetailsSection product={product} />
+      </div>
     </Card>
   );
 };
