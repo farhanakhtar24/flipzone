@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TabsContent } from "@/components/ui/tabs";
-import { ToastAction } from "@/components/ui/toast";
 import { useForm } from "react-hook-form";
 import { SignUpSchema } from "@/schemas/auth";
 import { z } from "zod";
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import Spinner from "@/components/ui/spinner";
 import FormError from "@/components/ui/form-error";
+import { ToastAction } from "@/components/ui/toast";
 
 // type Props = {};
 
@@ -56,11 +56,10 @@ const SignUpTab = () => {
       toast({
         title: "Registration successful.",
         description: "You have been successfully registered.",
-        variant: "default",
+        variant: "success",
         action: <ToastAction altText="Close">Close</ToastAction>,
       });
     }
-
     setLoading(false);
   };
 

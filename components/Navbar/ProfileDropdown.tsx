@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { logout } from "@/actions/auth.action";
+import { NavLinks } from "@/constant/NavLinks";
 
 type Props = {
   name: string | null | undefined;
@@ -36,10 +37,10 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
       <DropdownMenuContent className="space-y-1">
         <DropdownMenuLabel>{name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href="/cart">
+        <Link href={NavLinks.cart}>
           <DropdownMenuItem className="cursor-pointer">Cart</DropdownMenuItem>
         </Link>
-        <Link href="/orders">
+        <Link href={NavLinks.orders}>
           <DropdownMenuItem className="cursor-pointer">Orders</DropdownMenuItem>
         </Link>
         <DropdownMenuItem

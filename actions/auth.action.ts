@@ -76,7 +76,10 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       password,
     });
 
-    await loginWithCreds(values);
+    await loginWithCreds({
+      email,
+      password,
+    });
   } catch (error: unknown | AuthError) {
     if (error instanceof AuthError) {
       return { error: error.message };
