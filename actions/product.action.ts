@@ -2,10 +2,12 @@
 import { db } from "@/db";
 import { ApiResponse } from "@/interfaces/actionInterface";
 import { Product } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export const getAllProducts = async (): Promise<ApiResponse<Product[]>> => {
   try {
     const products = await db.product.findMany();
+    revalidatePath("/", "layout");
     return {
       statusCode: 200,
       success: true,
@@ -89,6 +91,7 @@ export async function addToCart({
       }
     });
 
+    revalidatePath("/", "layout");
     return {
       statusCode: 200,
       success: true,

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type BuyNowButtonProps = {
   product: Product;
@@ -24,6 +25,7 @@ const BuyNowButton = ({
   isBuyingNow,
   setIsBuyingNow,
 }: BuyNowButtonProps) => {
+  const router = useRouter();
   const { data: session } = useSession();
   const userId = session?.user.id;
   const productId = product.id;
@@ -31,7 +33,8 @@ const BuyNowButton = ({
   const handleSubmit = async () => {
     if (userId && productId) {
       setIsBuyingNow(true);
-
+      await addToCart({ userId, productId });
+      router.push(`/cart`);
       setIsBuyingNow(false);
     }
   };

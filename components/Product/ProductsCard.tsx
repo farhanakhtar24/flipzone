@@ -10,22 +10,16 @@ import {
 } from "../ui/card";
 import Image from "next/image";
 import { AddToCartButton, BuyNowButton } from "./ProductCardButtons";
+import { LuExternalLink } from "react-icons/lu";
+import Link from "next/link";
 
 type Props = {
   product: Product;
 };
 
 const ProductsCard = ({ product }: Props) => {
-  const {
-    thumbnail,
-    title,
-    price,
-    rating,
-    discountPercentage,
-    stock,
-    brand,
-    // availabilityStatus,
-  } = product;
+  const { thumbnail, title, price, rating, discountPercentage, stock, brand } =
+    product;
 
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -43,48 +37,52 @@ const ProductsCard = ({ product }: Props) => {
         </div>
       )}
       <Card className="flex h-full w-full flex-col">
-        <CardHeader>
+        <CardHeader className="flex h-full w-full flex-col">
+          <Link
+            href={`/products/${product.id}`}
+            className="absolute right-5 top-5 z-20 hover:opacity-75"
+          >
+            <LuExternalLink className="h-5 w-5" />
+          </Link>
           <Image src={thumbnail} alt={title} width={999} height={999} />
         </CardHeader>
-        <div className="flex h-full flex-col justify-between">
-          <CardContent className="space-y-2">
-            <p className="flex flex-col gap-1 text-lg font-semibold text-black/80">
-              {title}
-              <span className="text-sm text-gray-500">by {brand}</span>
-            </p>
-            <div className="flex items-baseline gap-3">
-              <CardTitle className="text-2xl font-bold">
-                {formattedPrice}
-              </CardTitle>
-              {discountPercentage && (
-                <p className="text-sm font-semibold text-green-700">
-                  {discountPercentage}% off
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-500">{rating} ⭐</p>
-            </div>
-          </CardContent>
-          <CardFooter className="">
-            {stock ? (
-              <div className="flex w-full flex-col items-center gap-2">
-                <BuyNowButton
-                  product={product}
-                  isBuyingNow={isBuyingNow}
-                  setIsBuyingNow={setIsBuyingNow}
-                />
-                <AddToCartButton
-                  product={product}
-                  isAddingToCart={isAddingToCart}
-                  setIsAddingToCart={setIsAddingToCart}
-                />
-              </div>
-            ) : (
-              <p className="my-2 text-red-500">Out of Stock</p>
+        <CardContent className="flex h-full flex-col space-y-2">
+          <p className="flex flex-grow flex-col gap-1 text-lg font-semibold text-black/80">
+            {title}
+            <span className="text-sm text-gray-500">by {brand}</span>
+          </p>
+          <div className="flex items-baseline gap-3">
+            <CardTitle className="text-2xl font-bold">
+              {formattedPrice}
+            </CardTitle>
+            {discountPercentage && (
+              <p className="text-sm font-semibold text-green-700">
+                {discountPercentage}% off
+              </p>
             )}
-          </CardFooter>
-        </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-gray-500">{rating} ⭐</p>
+          </div>
+        </CardContent>
+        <CardFooter className="">
+          {stock ? (
+            <div className="flex w-full flex-col items-center gap-2">
+              <BuyNowButton
+                product={product}
+                isBuyingNow={isBuyingNow}
+                setIsBuyingNow={setIsBuyingNow}
+              />
+              <AddToCartButton
+                product={product}
+                isAddingToCart={isAddingToCart}
+                setIsAddingToCart={setIsAddingToCart}
+              />
+            </div>
+          ) : (
+            <p className="my-2 text-red-500">Out of Stock</p>
+          )}
+        </CardFooter>
       </Card>
     </div>
   );
