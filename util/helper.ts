@@ -5,3 +5,10 @@ export function saltAndHashPassword(password: string) {
   const hash = bcrypt.hashSync(password, salt); // Synchronously hash the password
   return hash; // Return the hash directly as a string
 }
+
+export function priceFormatter(price: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(price);
+}

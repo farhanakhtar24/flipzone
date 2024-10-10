@@ -12,6 +12,7 @@ import Image from "next/image";
 import { AddToCartButton, BuyNowButton } from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
+import { priceFormatter } from "@/util/helper";
 
 type Props = {
   product: Product;
@@ -24,10 +25,7 @@ const ProductsCard = ({ product }: Props) => {
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const formattedPrice = price.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
+  const formattedPrice = priceFormatter(price);
 
   return (
     <div className="relative flex h-full w-full flex-col">
