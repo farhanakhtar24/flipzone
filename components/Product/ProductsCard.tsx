@@ -13,6 +13,7 @@ import { AddToCartButton, BuyNowButton } from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
 import { priceFormatter } from "@/util/helper";
+import RatingBox from "../RatingBox/RatingBox";
 
 type Props = {
   product: Product;
@@ -59,9 +60,10 @@ const ProductsCard = ({ product }: Props) => {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">{rating} ⭐</p>
-          </div>
+          </div> */}
+          <RatingBox rating={rating ?? 0} />
         </CardContent>
         <CardFooter className="">
           {stock ? (
