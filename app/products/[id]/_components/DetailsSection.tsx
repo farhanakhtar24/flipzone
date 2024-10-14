@@ -6,48 +6,22 @@ import { usePathname } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import RatingBox from "@/components/RatingBox/RatingBox";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
+import SpecificationTable from "./SpecificationTable";
+import RatingsTable from "./RatingsTable";
 
 type Props = {
   product: Product;
 };
 
 const DetailsSection = ({ product }: Props) => {
-  let {
-    title,
-    description,
-    brand,
-    discountPercentage,
-    price,
-    rating,
-    returnPolicy,
-    stock,
-    warrantyInformation,
-    reviews,
-  } = product;
+  let { title, discountPercentage, price, rating, reviews } = product;
 
-  if (
-    !description ||
-    !title ||
-    !brand ||
-    !discountPercentage ||
-    !price ||
-    !rating ||
-    !returnPolicy ||
-    !stock ||
-    !warrantyInformation ||
-    !reviews
-  ) {
-    description = "";
-    title = "";
-    brand = "";
-    discountPercentage = 0;
-    price = 0;
-    rating = 0;
-    returnPolicy = "";
-    stock = 0;
-    warrantyInformation = "";
-    reviews = [];
-  }
+  // Set default values if they are null, undefined, or empty
+  title = title ?? "";
+  discountPercentage = discountPercentage ?? 0;
+  price = price ?? 0;
+  rating = rating ?? 0;
+  reviews = reviews ?? [];
 
   const pathName = usePathname();
 
@@ -71,7 +45,7 @@ const DetailsSection = ({ product }: Props) => {
           </label>
         </div>
       </div>
-      <div className="flex w-full flex-wrap text-lg font-medium">{title}</div>
+      <div className="flex w-full flex-wrap text-lg font-semibold">{title}</div>
       <div className="flex w-full flex-wrap items-center gap-2">
         <RatingBox rating={rating} />
         <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
@@ -92,6 +66,8 @@ const DetailsSection = ({ product }: Props) => {
           </span>
         </span>
       </div>
+      <SpecificationTable product={product} />
+      <RatingsTable product={product} />
     </div>
   );
 };

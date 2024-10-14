@@ -11,10 +11,10 @@ type Props = {
 const ProductPage = ({ product }: Props) => {
   return (
     <Card className="flex h-full w-full gap-5 bg-white p-5">
-      <div className="flex-shrink">
+      <div className="w-[40%]">
         <PhotoSection product={product} />
       </div>
-      <div className="flex-grow">
+      <div className="w-[60%]">
         <DetailsSection product={product} />
       </div>
     </Card>

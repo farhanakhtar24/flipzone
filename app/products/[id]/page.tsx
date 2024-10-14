@@ -30,6 +30,8 @@ const page = async ({ params }: Props) => {
     );
   }
 
+  console.log({ product });
+
   return (
     <Wrapper>
       <ProductPage product={product} />

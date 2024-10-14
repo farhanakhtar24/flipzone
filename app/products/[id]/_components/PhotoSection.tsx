@@ -26,7 +26,7 @@ const PhotoSection = ({ product }: Props) => {
                 `h-16 w-16 cursor-pointer p-1`,
                 currentImage === image
                   ? "border-2 border-blue-500"
-                  : "border border-r-0 border-gray-200",
+                  : "border border-r-0",
               )}
               onClick={() => setCurrentImage(image)}
               onMouseEnter={() => setCurrentImage(image)}
@@ -34,7 +34,7 @@ const PhotoSection = ({ product }: Props) => {
           );
         })}
       </div>
-      <div className="flex flex-grow border border-gray-200">
+      <div className="flex flex-grow border">
         <Image
           src={currentImage}
           alt="product image"
