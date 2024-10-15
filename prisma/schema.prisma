@@ -31,9 +31,11 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relationships
-  cart     Cart?
-  orders   Order[]
-  accounts Account[]
+  cart       Cart? // User can have one cart
+  orders     Order[] // User can have many orders
+  accounts   Account[] // User can have many accounts
+  wishlist   Wishlist? // User can have one wishlist
+  comparison Comparison? // User can have one comparison
 }
 
 model Account {
@@ -77,20 +79,79 @@ model Product {
   minimumOrderQuantity Int?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
-  reviews              Review[]
-  meta                 MetaData?
 
   // Tags
   tags String[] // Changed to a string array for tags
 
   // Relationships
-  images    String[] // URLs for images
-  thumbnail String // URL for thumbnail image
+  images          String[] // URLs for images
+  thumbnail       String // URL for thumbnail image
+  categories      ProductCategory[] // Many-to-many with Category
+  cartItems       CartItem[] // Changed to plural for consistency
+  orderItems      OrderedItem[] // Changed to plural for consistency
+  reviews         Review[] // Updated to use the new Review model
+  wishlistItems   WishlistItem[] // New relationship with WishlistItem model
+  comparisonItems ComparisonItem[] // New relationship with ComparisonItem model
 
-  categories ProductCategory[] // Many-to-many with Category
-  cartItems  CartItem[] // Changed to plural for consistency
-  orderItems OrderedItem[] // Changed to plural for consistency
+  meta MetaData?
 }
+
+model Review {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating        Float
+  comment       String
+  date          DateTime @default(now())
+  reviewerName  String
+  reviewerEmail String
+
+  // Relationships
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Wishlist {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user  User           @relation(fields: [userId], references: [id])
+  items WishlistItem[] // Changed to 'items' for consistency
+}
+
+model WishlistItem {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  wishlistId String @db.ObjectId
+  productId  String @db.ObjectId
+
+  // Relationships
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Comparison {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user  User             @relation(fields: [userId], references: [id])
+  items ComparisonItem[] // Changed to 'items' for consistency
+}
+
+model ComparisonItem {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  comparisonId String @db.ObjectId
+  productId    String @db.ObjectId
+
+  // Relationships
+  comparison Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Other existing models remain unchanged
 
 model Category {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
@@ -108,7 +169,7 @@ model Cart {
 
   // Relationships
   user  User       @relation(fields: [userId], references: [id])
-  items CartItem[] // Renamed from 'cartItems' to 'items' for simplicity
+  items CartItem[] // Changed to 'items' for consistency
 }
 
 model CartItem {
@@ -143,7 +204,7 @@ model Order {
   // Relationships
   userId String        @db.ObjectId
   user   User          @relation(fields: [userId], references: [id])
-  items  OrderedItem[] // Renamed from 'orderItems' to 'items' for simplicity
+  items  OrderedItem[] // Changed to 'items' for consistency
 }
 
 model ProductCategory {
@@ -161,14 +222,6 @@ type Dimensions {
   width  Float
   height Float
   depth  Float
-}
-
-type Review {
-  rating        Float
-  comment       String
-  date          DateTime
-  reviewerName  String
-  reviewerEmail String
 }
 
 type MetaData {
