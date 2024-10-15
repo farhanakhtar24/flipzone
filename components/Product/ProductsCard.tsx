@@ -12,6 +12,8 @@ import Image from "next/image";
 import { AddToCartButton, BuyNowButton } from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
+import { priceFormatter } from "@/util/helper";
+import RatingBox from "../RatingBox/RatingBox";
 
 type Props = {
   product: Product;
@@ -24,10 +26,7 @@ const ProductsCard = ({ product }: Props) => {
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const formattedPrice = price.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
+  const formattedPrice = priceFormatter(price);
 
   return (
     <div className="relative flex h-full w-full flex-col">
@@ -61,9 +60,10 @@ const ProductsCard = ({ product }: Props) => {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">{rating} ⭐</p>
-          </div>
+          </div> */}
+          <RatingBox rating={rating ?? 0} />
         </CardContent>
         <CardFooter className="">
           {stock ? (

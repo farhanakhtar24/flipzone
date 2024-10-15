@@ -110,3 +110,29 @@ export async function addToCart({
     };
   }
 }
+
+export const getProductById = async (id: string) => {
+  try {
+    const product = await db.product.findUnique({
+      where: {
+        id,
+      },
+    });
+    return {
+      statusCode: 200,
+      success: true,
+      message: "Product fetched successfully.",
+      data: product,
+    };
+  } catch (error) {
+    console.error(error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred.";
+    return {
+      statusCode: 500,
+      success: false,
+      message: "Failed to fetch product. Please try again later.",
+      error: errorMessage,
+    };
+  }
+};

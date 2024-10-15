@@ -1,4 +1,7 @@
+import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
+import ProductPage from "./_components/ProductPage";
+import { getProductById } from "@/actions/product.action";
 
 type Props = {
   params: {
@@ -6,9 +9,34 @@ type Props = {
   };
 };
 
-const page = ({ params }: Props) => {
+const page = async ({ params }: Props) => {
   const { id } = params;
-  return <div>{id}</div>;
+
+  const { error, data: product } = await getProductById(id);
+
+  if (error) {
+    return (
+      <Wrapper>
+        <div>{error}</div>
+      </Wrapper>
+    );
+  }
+
+  if (!product) {
+    return (
+      <Wrapper>
+        <div>Product not found</div>
+      </Wrapper>
+    );
+  }
+
+  console.log({ product });
+
+  return (
+    <Wrapper>
+      <ProductPage product={product} />
+    </Wrapper>
+  );
 };
 
 export default page;

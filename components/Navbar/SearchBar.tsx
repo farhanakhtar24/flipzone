@@ -9,7 +9,7 @@ const SearchBar = () => {
     <input
       type="text"
       placeholder="Search"
-      className="hidden w-1/3 rounded-lg border border-gray-300 px-3 py-2 text-sm md:block"
+      className="hidden w-1/3 rounded-lg border px-3 py-2 text-sm md:block"
       value={search}
       onChange={(e) => setSearch(e.target.value)}
       onKeyDown={() => {

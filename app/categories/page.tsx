@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import React from "react";
 
-const Middleware = async () => {
+const page = async () => {
   const session = await auth();
 
   return (
@@ -14,4 +14,4 @@ const Middleware = async () => {
   );
 };
 
-export default Middleware;
+export default page;
