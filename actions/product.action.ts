@@ -56,11 +56,9 @@ export const getAllProducts = async (
 export async function addToCart({
   userId,
   productId,
-  quantity = 1,
 }: {
   userId: string;
   productId: string;
-  quantity?: number;
 }): Promise<ApiResponse<null>> {
   try {
     // Start a transaction to ensure data consistency
@@ -80,7 +78,7 @@ export async function addToCart({
             items: {
               create: {
                 productId,
-                quantity,
+                quantity: 1,
               },
             },
           },
@@ -101,7 +99,7 @@ export async function addToCart({
               id: existingCartItem.id,
             },
             data: {
-              quantity: existingCartItem.quantity + quantity,
+              quantity: existingCartItem.quantity + 1,
             },
           });
         } else {
@@ -110,7 +108,7 @@ export async function addToCart({
             data: {
               cartId: cart.id,
               productId,
-              quantity,
+              quantity: 1,
             },
           });
         }

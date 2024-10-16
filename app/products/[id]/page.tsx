@@ -4,6 +4,8 @@ import ProductPage from "./_components/ProductPage";
 import { getProductById } from "@/actions/product.action";
 import { auth } from "@/auth";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: {
     id: string;
