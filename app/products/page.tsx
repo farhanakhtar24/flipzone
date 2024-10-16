@@ -4,7 +4,7 @@ import React from "react";
 import ProductGrid from "./_components/ProductGrid";
 import { auth } from "@/auth";
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 const page = async () => {
   const session = await auth();
