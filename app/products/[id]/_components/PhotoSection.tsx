@@ -1,11 +1,11 @@
 "use client";
-import { Product } from "@prisma/client";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 import clsx from "clsx";
 import Image from "next/image";
 import React, { useState } from "react";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const PhotoSection = ({ product }: Props) => {

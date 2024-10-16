@@ -1,4 +1,4 @@
-import { Product } from "@prisma/client";
+import { Product, Review } from "@prisma/client";
 
 export interface ApiResponse<T> {
   statusCode: number; // HTTP status code (e.g., 200, 404, 500)
@@ -10,4 +10,5 @@ export interface ApiResponse<T> {
 
 export interface IproductWithCartStatus extends Product {
   isInCart: boolean;
+  reviews?: Review[];
 }

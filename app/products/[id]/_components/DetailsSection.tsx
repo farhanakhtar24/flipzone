@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { Product } from "@prisma/client";
 import BreadCrumbLinks from "@/components/BreadCrumbsLinks/BreadCrumbsLinks";
 import { usePathname } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,9 +7,10 @@ import RatingBox from "@/components/RatingBox/RatingBox";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import SpecificationTable from "./SpecificationTable";
 import RatingsTable from "./RatingsTable";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const DetailsSection = ({ product }: Props) => {

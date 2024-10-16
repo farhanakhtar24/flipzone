@@ -1,11 +1,11 @@
 import React from "react";
-import { Product } from "@prisma/client";
 import { IoIosStar } from "react-icons/io";
 import RatingBox from "@/components/RatingBox/RatingBox";
 import dayjs from "dayjs";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const RatingsTable = ({ product }: Props) => {

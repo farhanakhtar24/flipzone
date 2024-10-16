@@ -6,29 +6,27 @@ import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type BuyNowButtonProps = {
-  product: IproductWithCartStatus;
+  productId: string;
   isBuyingNow: boolean;
   setIsBuyingNow: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type AddingToCartProps = {
-  product: IproductWithCartStatus;
+  productId: string;
   isAddingToCart: boolean;
   setIsAddingToCart: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const BuyNowButton = ({
-  product,
+  productId,
   isBuyingNow,
   setIsBuyingNow,
 }: BuyNowButtonProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const userId = session?.user.id;
-  const productId = product.id;
 
   const handleSubmit = async () => {
     if (userId && productId) {
@@ -58,7 +56,7 @@ const BuyNowButton = ({
 };
 
 const AddToCartButton = ({
-  product,
+  productId,
   isAddingToCart,
   setIsAddingToCart,
 }: AddingToCartProps) => {
@@ -66,7 +64,6 @@ const AddToCartButton = ({
   const { data: session } = useSession();
 
   const userId = session?.user.id;
-  const productId = product.id;
 
   const handleSubmit = async () => {
     if (userId && productId) {
@@ -115,4 +112,20 @@ const AddToCartButton = ({
   );
 };
 
-export { BuyNowButton, AddToCartButton };
+const GoToCartButton = () => {
+  const router = useRouter();
+  return (
+    <Button
+      variant="outline"
+      size="lg"
+      className="w-full"
+      onClick={() => {
+        router.push("/cart");
+      }}
+    >
+      Go to Cart
+    </Button>
+  );
+};
+
+export { BuyNowButton, AddToCartButton, GoToCartButton };

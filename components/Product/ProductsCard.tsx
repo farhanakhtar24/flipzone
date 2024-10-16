@@ -8,7 +8,11 @@ import {
   CardContent,
 } from "../ui/card";
 import Image from "next/image";
-import { AddToCartButton, BuyNowButton } from "./ProductCardButtons";
+import {
+  AddToCartButton,
+  BuyNowButton,
+  GoToCartButton,
+} from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
 import { priceFormatter } from "@/util/helper";
@@ -20,8 +24,17 @@ type Props = {
 };
 
 const ProductsCard = ({ product }: Props) => {
-  const { thumbnail, title, price, rating, discountPercentage, stock, brand } =
-    product;
+  const {
+    thumbnail,
+    title,
+    price,
+    rating,
+    discountPercentage,
+    stock,
+    brand,
+    id,
+    isInCart,
+  } = product;
 
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -38,7 +51,7 @@ const ProductsCard = ({ product }: Props) => {
       <Card className="flex h-full w-full flex-col">
         <CardHeader className="flex h-full w-full flex-col">
           <Link
-            href={`/products/${product.id}`}
+            href={`/products/${id}`}
             className="absolute right-5 top-5 z-20 hover:opacity-75"
           >
             <LuExternalLink className="h-5 w-5" />
@@ -69,15 +82,19 @@ const ProductsCard = ({ product }: Props) => {
           {stock ? (
             <div className="flex w-full flex-col items-center gap-2">
               <BuyNowButton
-                product={product}
+                productId={id}
                 isBuyingNow={isBuyingNow}
                 setIsBuyingNow={setIsBuyingNow}
               />
-              <AddToCartButton
-                product={product}
-                isAddingToCart={isAddingToCart}
-                setIsAddingToCart={setIsAddingToCart}
-              />
+              {isInCart ? (
+                <GoToCartButton />
+              ) : (
+                <AddToCartButton
+                  productId={id}
+                  isAddingToCart={isAddingToCart}
+                  setIsAddingToCart={setIsAddingToCart}
+                />
+              )}
             </div>
           ) : (
             <p className="my-2 text-red-500">Out of Stock</p>
