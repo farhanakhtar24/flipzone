@@ -2,10 +2,10 @@ import { Card } from "@/components/ui/card";
 import React from "react";
 import PhotoSection from "./PhotoSection";
 import DetailsSection from "./DetailsSection";
-import { IentendedProduct } from "@/interfaces/actionInterface";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type Props = {
-  product: IentendedProduct;
+  product: IproductWithCartStatus;
 };
 
 const ProductPage = ({ product }: Props) => {

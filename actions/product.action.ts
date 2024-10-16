@@ -1,18 +1,44 @@
 "use server";
 import { db } from "@/db";
-import { ApiResponse, IentendedProduct } from "@/interfaces/actionInterface";
-import { Product } from "@prisma/client";
+import {
+  ApiResponse,
+  IproductWithCartStatus,
+} from "@/interfaces/actionInterface";
 import { revalidatePath } from "next/cache";
 
-export const getAllProducts = async (): Promise<ApiResponse<Product[]>> => {
+export const getAllProducts = async (
+  userId: string,
+): Promise<ApiResponse<IproductWithCartStatus[]>> => {
   try {
-    const products = await db.product.findMany();
-    revalidatePath("/", "layout");
+    // Fetch products with cart item info only for checking user cart status
+    const products = await db.product.findMany({
+      include: {
+        cartItems: {
+          where: {
+            cart: {
+              userId,
+            },
+          },
+          select: {
+            id: true, // Only fetch necessary fields for checking if the product is in the cart
+          },
+        },
+      },
+    });
+
+    // Remove the cartItems property and only keep the isInCart status for each product
+    const productsWithCartStatus = products.map(
+      ({ cartItems, ...product }) => ({
+        ...product,
+        isInCart: cartItems.length > 0, // Check if there are any cart items for the user
+      }),
+    );
+
     return {
       statusCode: 200,
       success: true,
       message: "Products fetched successfully.",
-      data: products,
+      data: productsWithCartStatus,
     };
   } catch (error) {
     console.error(error);
@@ -114,7 +140,7 @@ export async function addToCart({
 export const getProductById = async (
   productId: string,
   userId: string,
-): Promise<ApiResponse<IentendedProduct>> => {
+): Promise<ApiResponse<IproductWithCartStatus>> => {
   try {
     // Fetch the product details
     const product = await db.product.findUnique({

@@ -1,5 +1,4 @@
 "use client";
-import { Product } from "@prisma/client";
 import React, { useState } from "react";
 import {
   Card,
@@ -14,9 +13,10 @@ import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
 import { priceFormatter } from "@/util/helper";
 import RatingBox from "../RatingBox/RatingBox";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const ProductsCard = ({ product }: Props) => {

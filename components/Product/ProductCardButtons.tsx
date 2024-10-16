@@ -1,5 +1,4 @@
 "use client";
-import { Product } from "@prisma/client";
 import React from "react";
 import { Button } from "../ui/button";
 import { useSession } from "next-auth/react";
@@ -7,15 +6,16 @@ import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type BuyNowButtonProps = {
-  product: Product;
+  product: IproductWithCartStatus;
   isBuyingNow: boolean;
   setIsBuyingNow: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type AddingToCartProps = {
-  product: Product;
+  product: IproductWithCartStatus;
   isAddingToCart: boolean;
   setIsAddingToCart: React.Dispatch<React.SetStateAction<boolean>>;
 };

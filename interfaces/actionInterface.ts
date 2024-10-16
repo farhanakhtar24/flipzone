@@ -8,6 +8,6 @@ export interface ApiResponse<T> {
   error?: string; // Error message (if any)
 }
 
-export interface IentendedProduct extends Product {
+export interface IproductWithCartStatus extends Product {
   isInCart: boolean;
 }
