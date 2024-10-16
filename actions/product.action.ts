@@ -1,18 +1,44 @@
 "use server";
 import { db } from "@/db";
-import { ApiResponse } from "@/interfaces/actionInterface";
-import { Product } from "@prisma/client";
+import {
+  ApiResponse,
+  IproductWithCartStatus,
+} from "@/interfaces/actionInterface";
 import { revalidatePath } from "next/cache";
 
-export const getAllProducts = async (): Promise<ApiResponse<Product[]>> => {
+export const getAllProducts = async (
+  userId: string,
+): Promise<ApiResponse<IproductWithCartStatus[]>> => {
   try {
-    const products = await db.product.findMany();
-    revalidatePath("/", "layout");
+    // Fetch products with cart item info only for checking user cart status
+    const products = await db.product.findMany({
+      include: {
+        cartItems: {
+          where: {
+            cart: {
+              userId,
+            },
+          },
+          select: {
+            id: true, // Only fetch necessary fields for checking if the product is in the cart
+          },
+        },
+      },
+    });
+
+    // Remove the cartItems property and only keep the isInCart status for each product
+    const productsWithCartStatus = products.map(
+      ({ cartItems, ...product }) => ({
+        ...product,
+        isInCart: cartItems.length > 0, // Check if there are any cart items for the user
+      }),
+    );
+
     return {
       statusCode: 200,
       success: true,
       message: "Products fetched successfully.",
-      data: products,
+      data: productsWithCartStatus,
     };
   } catch (error) {
     console.error(error);
@@ -30,11 +56,9 @@ export const getAllProducts = async (): Promise<ApiResponse<Product[]>> => {
 export async function addToCart({
   userId,
   productId,
-  quantity = 1,
 }: {
   userId: string;
   productId: string;
-  quantity?: number;
 }): Promise<ApiResponse<null>> {
   try {
     // Start a transaction to ensure data consistency
@@ -54,7 +78,7 @@ export async function addToCart({
             items: {
               create: {
                 productId,
-                quantity,
+                quantity: 1,
               },
             },
           },
@@ -75,7 +99,7 @@ export async function addToCart({
               id: existingCartItem.id,
             },
             data: {
-              quantity: existingCartItem.quantity + quantity,
+              quantity: existingCartItem.quantity + 1,
             },
           });
         } else {
@@ -84,7 +108,7 @@ export async function addToCart({
             data: {
               cartId: cart.id,
               productId,
-              quantity,
+              quantity: 1,
             },
           });
         }
@@ -111,18 +135,52 @@ export async function addToCart({
   }
 }
 
-export const getProductById = async (id: string) => {
+export const getProductById = async (
+  productId: string,
+  userId: string,
+): Promise<ApiResponse<IproductWithCartStatus>> => {
   try {
+    // Fetch the product details
     const product = await db.product.findUnique({
       where: {
-        id,
+        id: productId,
+      },
+      include: {
+        cartItems: {
+          where: {
+            cart: {
+              userId,
+            },
+          },
+        },
+        reviews: true,
       },
     });
+
+    // If product doesn't exist, return a not found response
+    if (!product) {
+      return {
+        statusCode: 404,
+        success: false,
+        message: "Product not found.",
+      };
+    }
+
+    // Determine if the product is in the user's cart
+    const isInCart = product.cartItems.length > 0;
+
+    // Create a new product object that includes isInCart without altering original product
+    const productWithCartStatus = {
+      ...product,
+      isInCart,
+    };
+
+    // Return the product with the isInCart property included
     return {
       statusCode: 200,
       success: true,
       message: "Product fetched successfully.",
-      data: product,
+      data: productWithCartStatus,
     };
   } catch (error) {
     console.error(error);

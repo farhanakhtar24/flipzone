@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
-import { Product } from "@prisma/client";
 import React from "react";
 import PhotoSection from "./PhotoSection";
 import DetailsSection from "./DetailsSection";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const ProductPage = ({ product }: Props) => {

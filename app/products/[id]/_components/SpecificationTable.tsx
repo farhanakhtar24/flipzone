@@ -1,8 +1,8 @@
-import { Product } from "@prisma/client";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 import React from "react";
 
 type Props = {
-  product: Product;
+  product: IproductWithCartStatus;
 };
 
 const SpecificationTable = ({ product }: Props) => {

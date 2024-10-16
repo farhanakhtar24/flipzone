@@ -1,9 +1,9 @@
 import ProductsCard from "@/components/Product/ProductsCard";
-import { Product } from "@prisma/client";
+import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 import React from "react";
 
 type Props = {
-  products: Product[];
+  products: IproductWithCartStatus[];
 };
 
 const ProductGrid = ({ products }: Props) => {
