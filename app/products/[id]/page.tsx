@@ -2,6 +2,7 @@ import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
 import ProductPage from "./_components/ProductPage";
 import { getProductById } from "@/actions/product.action";
+import { auth } from "@/auth";
 
 type Props = {
   params: {
@@ -10,9 +11,18 @@ type Props = {
 };
 
 const page = async ({ params }: Props) => {
+  const session = await auth();
   const { id } = params;
 
-  const { error, data: product } = await getProductById(id);
+  if (!session?.user?.id) {
+    return (
+      <Wrapper>
+        <div>Product not found</div>
+      </Wrapper>
+    );
+  }
+
+  const { error, data: product } = await getProductById(id, session.user.id);
 
   if (error) {
     return (

@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/db";
-import { ApiResponse } from "@/interfaces/actionInterface";
+import { ApiResponse, IentendedProduct } from "@/interfaces/actionInterface";
 import { Product } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
@@ -111,18 +111,52 @@ export async function addToCart({
   }
 }
 
-export const getProductById = async (id: string) => {
+export const getProductById = async (
+  productId: string,
+  userId: string,
+): Promise<ApiResponse<IentendedProduct>> => {
   try {
+    // Fetch the product details
     const product = await db.product.findUnique({
       where: {
-        id,
+        id: productId,
+      },
+      include: {
+        cartItems: {
+          where: {
+            cart: {
+              userId,
+            },
+          },
+        },
+        reviews: true,
       },
     });
+
+    // If product doesn't exist, return a not found response
+    if (!product) {
+      return {
+        statusCode: 404,
+        success: false,
+        message: "Product not found.",
+      };
+    }
+
+    // Determine if the product is in the user's cart
+    const isInCart = product.cartItems.length > 0;
+
+    // Create a new product object that includes isInCart without altering original product
+    const productWithCartStatus = {
+      ...product,
+      isInCart,
+    };
+
+    // Return the product with the isInCart property included
     return {
       statusCode: 200,
       success: true,
       message: "Product fetched successfully.",
-      data: product,
+      data: productWithCartStatus,
     };
   } catch (error) {
     console.error(error);
