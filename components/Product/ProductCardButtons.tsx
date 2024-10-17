@@ -138,14 +138,29 @@ const GoToCartButton = () => {
 const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
   const { data: session } = useSession();
   const userId = session?.user.id;
+  const { toast } = useToast();
 
   const handleSubmit = async () => {
     if (userId && productId) {
-      await wishlistItem({
+      const { error, message } = await wishlistItem({
         productId,
         userId,
         wishListedItem: !isWishlisted,
       });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: message,
+          variant: "destructive",
+        });
+      } else if (message) {
+        toast({
+          title: "Success",
+          description: message,
+          variant: "success",
+        });
+      }
     }
   };
 
