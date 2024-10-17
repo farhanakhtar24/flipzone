@@ -10,7 +10,7 @@ export const getAllProducts = async (
   userId: string,
 ): Promise<ApiResponse<IproductWithCartStatus[]>> => {
   try {
-    // Fetch products with cart item info only for checking user cart status
+    // Fetch products with cart item and wishlist item info for checking user status
     const products = await db.product.findMany({
       include: {
         cartItems: {
@@ -20,17 +20,28 @@ export const getAllProducts = async (
             },
           },
           select: {
-            id: true, // Only fetch necessary fields for checking if the product is in the cart
+            id: true, // Only fetch necessary fields to check if the product is in the cart
+          },
+        },
+        wishlistItems: {
+          where: {
+            wishlist: {
+              userId,
+            },
+          },
+          select: {
+            id: true, // Only fetch necessary fields to check if the product is in the wishlist
           },
         },
       },
     });
 
-    // Remove the cartItems property and only keep the isInCart status for each product
+    // Map the products to include the isInCart and isWishlisted status
     const productsWithCartStatus = products.map(
-      ({ cartItems, ...product }) => ({
+      ({ cartItems, wishlistItems, ...product }) => ({
         ...product,
-        isInCart: cartItems.length > 0, // Check if there are any cart items for the user
+        isInCart: cartItems.length > 0, // Check if the product is in the user's cart
+        isWishlisted: wishlistItems.length > 0, // Check if the product is in the user's wishlist
       }),
     );
 
@@ -41,7 +52,10 @@ export const getAllProducts = async (
       data: productsWithCartStatus,
     };
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Error fetching products with cart and wishlist status:",
+      error,
+    );
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred.";
     return {
@@ -153,6 +167,13 @@ export const getProductById = async (
             },
           },
         },
+        wishlistItems: {
+          where: {
+            wishlist: {
+              userId,
+            },
+          },
+        },
         reviews: true,
       },
     });
@@ -168,11 +189,13 @@ export const getProductById = async (
 
     // Determine if the product is in the user's cart
     const isInCart = product.cartItems.length > 0;
+    const isWishlisted = product.wishlistItems.length > 0;
 
     // Create a new product object that includes isInCart without altering original product
     const productWithCartStatus = {
       ...product,
       isInCart,
+      isWishlisted,
     };
 
     // Return the product with the isInCart property included

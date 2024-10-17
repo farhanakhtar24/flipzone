@@ -6,6 +6,8 @@ import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { wishlistItem } from "@/actions/wishlist.action";
+import { FiHeart } from "react-icons/fi";
 
 type BuyNowButtonProps = {
   productId: string;
@@ -17,6 +19,11 @@ type AddingToCartProps = {
   productId: string;
   isAddingToCart: boolean;
   setIsAddingToCart: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+type WishlistingProps = {
+  productId: string;
+  isWishlisted: boolean;
 };
 
 const BuyNowButton = ({
@@ -128,4 +135,30 @@ const GoToCartButton = () => {
   );
 };
 
-export { BuyNowButton, AddToCartButton, GoToCartButton };
+const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
+  const { data: session } = useSession();
+  const userId = session?.user.id;
+
+  const handleSubmit = async () => {
+    if (userId && productId) {
+      await wishlistItem({
+        productId,
+        userId,
+        wishListedItem: !isWishlisted,
+      });
+    }
+  };
+
+  return (
+    <div
+      className="h-full w-full cursor-pointer rounded-full border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75"
+      onClick={handleSubmit}
+    >
+      <FiHeart
+        className={`h-full w-full ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"}`}
+      />
+    </div>
+  );
+};
+
+export { BuyNowButton, AddToCartButton, GoToCartButton, WishListButton };
