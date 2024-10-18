@@ -174,6 +174,13 @@ export const getProductById = async (
             },
           },
         },
+        comparisonItems: {
+          where: {
+            comparison: {
+              userId,
+            },
+          },
+        },
         reviews: true,
       },
     });
@@ -187,18 +194,20 @@ export const getProductById = async (
       };
     }
 
-    // Determine if the product is in the user's cart
+    // Determine if the product is in the user's cart, wishlist, and comparison list
     const isInCart = product.cartItems.length > 0;
     const isWishlisted = product.wishlistItems.length > 0;
+    const isCompared = product.comparisonItems.length > 0;
 
-    // Create a new product object that includes isInCart without altering original product
+    // Create a new product object that includes isInCart, isWishlisted, and isCompared
     const productWithCartStatus = {
       ...product,
       isInCart,
       isWishlisted,
+      isCompared,
     };
 
-    // Return the product with the isInCart property included
+    // Return the product with the isInCart, isWishlisted, and isCompared properties included
     return {
       statusCode: 200,
       success: true,
@@ -206,7 +215,7 @@ export const getProductById = async (
       data: productWithCartStatus,
     };
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching product:", error);
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred.";
     return {

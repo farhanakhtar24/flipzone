@@ -5,6 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
+import ComparisonPanel from "@/components/Product/ComparisonPanel";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
             <div className="flex h-full w-full items-center justify-center py-10">
               {children}
             </div>
+            <ComparisonPanel />
             <Toaster />
           </main>
         </body>

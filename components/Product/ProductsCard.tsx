@@ -49,7 +49,7 @@ const ProductsCard = ({ product }: Props) => {
         <CardHeader className="relative flex h-full w-full flex-col">
           <Link
             href={`/products/${id}`}
-            className="absolute right-5 top-5 z-20 hover:opacity-75"
+            className="absolute right-5 top-5 z-20 rounded bg-white p-2 text-gray-600 transition-all hover:bg-slate-100"
           >
             <LuExternalLink className="h-5 w-5" />
           </Link>

@@ -3,6 +3,7 @@ import {
   AddToCartButton,
   BuyNowButton,
   GoToCartButton,
+  WishListButton,
 } from "@/components/Product/ProductCardButtons";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 import clsx from "clsx";
@@ -17,11 +18,14 @@ const PhotoSection = ({ product }: Props) => {
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const { images, isInCart, id } = product;
+  const { images, isInCart, id, isWishlisted } = product;
   const [currentImage, setCurrentImage] = useState(images[0]);
   return (
-    <div className="flex w-full">
-      <div className="flex h-full max-h-[400px] flex-shrink-0 flex-col overflow-auto contain-content">
+    <div className="relative flex w-full">
+      <div className="absolute right-3 top-3 z-20 h-9 w-9">
+        <WishListButton isWishlisted={isWishlisted} productId={id} />
+      </div>
+      <div className="relative flex h-full max-h-[400px] flex-shrink-0 flex-col overflow-auto">
         {images.map((image, index) => {
           return (
             <Image

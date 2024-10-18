@@ -2,26 +2,29 @@
 import React from "react";
 import BreadCrumbLinks from "@/components/BreadCrumbsLinks/BreadCrumbsLinks";
 import { usePathname } from "next/navigation";
-import { Checkbox } from "@/components/ui/checkbox";
 import RatingBox from "@/components/RatingBox/RatingBox";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import SpecificationTable from "./SpecificationTable";
 import RatingsTable from "./RatingsTable";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
+import ComparisonBox from "./ComparisonBox";
 
 type Props = {
   product: IproductWithCartStatus;
 };
 
 const DetailsSection = ({ product }: Props) => {
-  let { title, discountPercentage, price, rating, reviews } = product;
+  let { title, discountPercentage, price, rating, reviews, id, isCompared } =
+    product;
 
   // Set default values if they are null, undefined, or empty
+  id = id ?? "";
   title = title ?? "";
   discountPercentage = discountPercentage ?? 0;
   price = price ?? 0;
   rating = rating ?? 0;
   reviews = reviews ?? [];
+  isCompared = isCompared ?? false;
 
   const pathName = usePathname();
 
@@ -35,15 +38,7 @@ const DetailsSection = ({ product }: Props) => {
     <div className="flex h-full w-full flex-col gap-2">
       <div className="flex w-full items-center justify-between gap-2">
         <BreadCrumbLinks pathname={pathName} />
-        <div className="flex items-center space-x-2">
-          <Checkbox id="Compare" />
-          <label
-            htmlFor="Compare"
-            className="text-sm font-light leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Compare
-          </label>
-        </div>
+        <ComparisonBox productId={id} isCompared={isCompared} />
       </div>
       <div className="flex w-full flex-wrap text-lg font-semibold">{title}</div>
       <div className="flex w-full flex-wrap items-center gap-2">
