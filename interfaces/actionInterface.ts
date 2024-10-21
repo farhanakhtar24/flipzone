@@ -10,5 +10,7 @@ export interface ApiResponse<T> {
 
 export interface IproductWithCartStatus extends Product {
   isInCart: boolean;
+  isWishlisted: boolean;
+  isCompared?: boolean;
   reviews?: Review[];
 }

@@ -4,9 +4,10 @@ import SessionContext from "@/context/SessionContext";
 import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
-import { Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
+import ComparisonPanel from "@/components/Product/ComparisonPanel";
 
-const montserrat = Montserrat({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
@@ -24,13 +25,14 @@ export default function RootLayout({
   return (
     <SessionContext>
       <html lang="en">
-        <body className={`${montserrat.className} antialiased`}>
+        <body className={`${inter.className} antialiased`}>
           <NextTopLoader />
           <Navbar />
           <main className="min-h-[88vh] overflow-y-auto bg-slate-50">
             <div className="flex h-full w-full items-center justify-center py-10">
               {children}
             </div>
+            <ComparisonPanel />
             <Toaster />
           </main>
         </body>

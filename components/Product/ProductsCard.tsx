@@ -12,6 +12,7 @@ import {
   AddToCartButton,
   BuyNowButton,
   GoToCartButton,
+  WishListButton,
 } from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
@@ -34,6 +35,7 @@ const ProductsCard = ({ product }: Props) => {
     brand,
     id,
     isInCart,
+    isWishlisted,
   } = product;
 
   const [isBuyingNow, setIsBuyingNow] = useState(false);
@@ -42,20 +44,18 @@ const ProductsCard = ({ product }: Props) => {
   const formattedPrice = priceFormatter(price);
 
   return (
-    <div className="relative flex h-full w-full flex-col">
-      {!stock && (
-        <div className="absolute left-0 top-0 z-10 flex h-full w-full cursor-not-allowed items-center justify-center rounded-lg bg-black/50">
-          <p className="text-2xl font-semibold text-white">Out of Stock</p>
-        </div>
-      )}
+    <div className="flex h-full w-full flex-col">
       <Card className="flex h-full w-full flex-col">
-        <CardHeader className="flex h-full w-full flex-col">
+        <CardHeader className="relative flex h-full w-full flex-col">
           <Link
             href={`/products/${id}`}
-            className="absolute right-5 top-5 z-20 hover:opacity-75"
+            className="absolute right-5 top-5 z-20 rounded bg-white p-2 text-gray-600 transition-all hover:bg-slate-100"
           >
             <LuExternalLink className="h-5 w-5" />
           </Link>
+          <div className="absolute bottom-5 right-5 z-20 h-9 w-9">
+            <WishListButton isWishlisted={isWishlisted} productId={id} />
+          </div>
           <Image src={thumbnail} alt={title} width={999} height={999} />
         </CardHeader>
         <CardContent className="flex h-full flex-col space-y-2">
@@ -73,9 +73,6 @@ const ProductsCard = ({ product }: Props) => {
               </p>
             )}
           </div>
-          {/* <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-500">{rating} ⭐</p>
-          </div> */}
           <RatingBox rating={rating ?? 0} />
         </CardContent>
         <CardFooter className="">
