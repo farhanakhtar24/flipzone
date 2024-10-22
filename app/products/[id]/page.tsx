@@ -24,7 +24,11 @@ const page = async ({ params }: Props) => {
     );
   }
 
-  const { error, data: product } = await getProductById(id, session.user.id);
+  const {
+    error,
+    data: product,
+    message,
+  } = await getProductById(id, session.user.id);
 
   if (error) {
     return (
@@ -37,9 +41,13 @@ const page = async ({ params }: Props) => {
   if (!product) {
     return (
       <Wrapper>
-        <div>Product not found</div>
+        <div>{message}</div>
       </Wrapper>
     );
+  }
+
+  if (message) {
+    console.log("message :", message);
   }
 
   console.log({ product });

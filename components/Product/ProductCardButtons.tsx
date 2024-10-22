@@ -84,14 +84,15 @@ const AddToCartButton = ({
       // raise a toast here
       if (error) {
         toast({
-          title: "Error",
-          description: message,
+          title: message,
+          description: error,
           variant: "destructive",
         });
-      } else if (message) {
+      }
+
+      if (message) {
         toast({
-          title: "Success",
-          description: message,
+          title: message,
           variant: "success",
         });
       }
@@ -150,14 +151,13 @@ const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
 
       if (error) {
         toast({
-          title: "Error",
-          description: message,
+          title: message,
+          description: error,
           variant: "destructive",
         });
       } else if (message) {
         toast({
-          title: "Success",
-          description: message,
+          title: message,
           variant: "success",
         });
       }

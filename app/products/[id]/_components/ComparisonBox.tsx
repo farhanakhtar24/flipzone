@@ -25,16 +25,13 @@ const ComparisonBox = ({ productId, isCompared }: Props) => {
 
       if (error) {
         toast({
-          title: "Error",
+          title: message,
           description: error,
           variant: "destructive",
         });
-      }
-
-      if (message) {
+      } else if (message) {
         toast({
-          title: "Success",
-          description: message,
+          title: message,
           variant: "success",
         });
       }
