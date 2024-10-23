@@ -9,9 +9,7 @@ datasource db {
 
 enum OrderStatus {
   PENDING
-  SHIPPED
-  DELIVERED
-  CANCELLED
+  PLACED
 }
 
 enum UserRole {

@@ -1,16 +1,13 @@
 "use client";
+import React from "react";
 import { updateCartItemQuantity } from "@/actions/cart.action";
 import RatingBox from "@/components/RatingBox/RatingBox";
-import { Button } from "@/components/ui/button";
 import { CardContent, CardTitle } from "@/components/ui/card";
-import Spinner from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { IcartItemWithProduct } from "@/interfaces/actionInterface";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import Image from "next/image";
-import React, { useState } from "react";
-import { FiMinus } from "react-icons/fi";
-import { GoPlus } from "react-icons/go";
+import { QunatitySelectorInputs, RemoveItemButton } from "./CartButtons";
 
 type Props = {
   item: IcartItemWithProduct;
@@ -19,8 +16,6 @@ type Props = {
 const CartItem = ({ item }: Props) => {
   const { toast } = useToast();
   const { product, quantity, id: cartItemId } = item;
-
-  const [loading, setLoading] = useState(false);
 
   let { title, thumbnail, price, discountPercentage, stock, rating } = product;
 
@@ -84,43 +79,14 @@ const CartItem = ({ item }: Props) => {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div className="flex w-[20%] items-center justify-start gap-2 xl:w-[15%] xl:justify-center">
-          <button
-            className="flex aspect-square h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-gray-100"
-            onClick={() => handleQuantityUpdate(-1)}
-          >
-            <FiMinus />
-          </button>
-          <input
-            type="number"
-            value={quantity}
-            className="w-12 rounded border text-center"
-            readOnly
-          />
-          <button
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => handleQuantityUpdate(1)}
-          >
-            <GoPlus />
-          </button>
-        </div>
-        <Button
-          className="justify-centers flex min-w-28 items-center bg-red-700 hover:bg-red-500"
-          onClick={async () => {
-            setLoading(true);
-            await handleQuantityUpdate(-quantity);
-            setLoading(false);
-          }}
-          disabled={loading}
-        >
-          {loading ? (
-            <div className="h-5 w-5">
-              <Spinner className="text-white" />
-            </div>
-          ) : (
-            <>Remove</>
-          )}
-        </Button>
+        <QunatitySelectorInputs
+          quantity={quantity}
+          handleQuantityUpdate={handleQuantityUpdate}
+        />
+        <RemoveItemButton
+          handleQuantityUpdate={handleQuantityUpdate}
+          quantity={quantity}
+        />
       </div>
     </CardContent>
   );

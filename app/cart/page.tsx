@@ -29,15 +29,15 @@ const page = async () => {
     );
   }
 
-  if (!cartData) {
-    return (
-      <Wrapper>
-        <Card>
-          <CardContent className="p-6">{message}</CardContent>
-        </Card>
-      </Wrapper>
-    );
-  }
+  // if (!cartData) {
+  //   return (
+  //     <Wrapper>
+  //       <Card>
+  //         <CardContent className="p-6">{message}</CardContent>
+  //       </Card>
+  //     </Wrapper>
+  //   );
+  // }
 
   if (message) {
     console.log("message :", message);
@@ -53,10 +53,16 @@ const page = async () => {
             <CardTitle className="text-2xl">Cart</CardTitle>
           </CardHeader>
         </Card>
-        <div className="flex h-full w-full gap-5">
-          <CartItemsSection cartData={cartData} />
-          <CartSummary cart={cartData} />
-        </div>
+        {cartData ? (
+          <div className="flex h-full w-full gap-5">
+            <CartItemsSection cartData={cartData} />
+            <CartSummary cartData={cartData} />
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="p-6">{message}</CardContent>
+          </Card>
+        )}
       </div>
     </Wrapper>
   );

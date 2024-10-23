@@ -174,3 +174,91 @@ export const updateCartItemQuantity = async (
     };
   }
 };
+
+export const placeOrderFromCart = async (
+  cartId: string,
+): Promise<ApiResponse<null>> => {
+  try {
+    // Start a transaction
+    const result = await db.$transaction(async (prisma) => {
+      // Find the user's cart with its items
+      const cart = await prisma.cart.findUnique({
+        where: {
+          id: cartId,
+        },
+        include: {
+          items: {
+            include: {
+              product: true, // Include product details
+            },
+          },
+        },
+      });
+
+      // If the cart is not found, return a 404 response
+      if (!cart || cart.items.length === 0) {
+        return {
+          statusCode: 404,
+          success: false,
+          message: "Cart is empty or not found.",
+        };
+      }
+
+      // Create an order object with ordered items from the cart
+      await prisma.order.create({
+        data: {
+          userId: cart.userId,
+          total: cart.items.reduce(
+            (total, item) => total + item.product.price * item.quantity,
+            0,
+          ), // Calculate total price
+          status: "PLACED", // Initial order status
+          items: {
+            create: cart.items.map((cartItem) => ({
+              quantity: cartItem.quantity,
+              product: {
+                connect: {
+                  id: cartItem.productId,
+                },
+              },
+            })),
+          },
+        },
+      });
+
+      // After the order is created, delete the cart and its items
+      await prisma.cartItem.deleteMany({
+        where: {
+          cartId: cartId,
+        },
+      });
+
+      await prisma.cart.delete({
+        where: {
+          id: cartId,
+        },
+      });
+
+      return {
+        statusCode: 200,
+        success: true,
+        message: "Order placed successfully, and cart cleared.",
+      };
+    });
+
+    // Optionally, trigger any revalidation if necessary
+    revalidatePath("/", "layout");
+
+    return result;
+  } catch (error) {
+    console.error("Error placing order:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred.";
+    return {
+      statusCode: 500,
+      success: false,
+      message: "Failed to place order. Please try again later.",
+      error: errorMessage,
+    };
+  }
+};

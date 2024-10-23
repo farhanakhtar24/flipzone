@@ -1,15 +1,16 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { IcartSummary } from "@/interfaces/actionInterface";
-import { priceFormatter } from "@/util/helper";
 import React from "react";
+import { priceFormatter } from "@/util/helper";
+import { PlaceOrderButton } from "./CartButtons";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
+import { IcartSummary } from "@/interfaces/actionInterface";
 
 type Props = {
-  cart: IcartSummary;
+  cartData: IcartSummary;
 };
 
-const CartSummary = ({ cart }: Props) => {
-  const { finalPrice, totalDiscount, totalMRP, totalQuantity } = cart;
+const CartSummary = ({ cartData }: Props) => {
+  const { finalPrice, totalDiscount, totalMRP, totalQuantity, cart } = cartData;
 
   const formattedPrices = {
     originaltotal: priceFormatter(totalMRP),
@@ -19,11 +20,11 @@ const CartSummary = ({ cart }: Props) => {
 
   return (
     <Card className="flex h-[63vh] w-[30%]">
-      <CardContent className="flex w-full flex-col divide-y p-0">
-        <div className="flex justify-between p-6">
+      <CardContent className="flex h-full w-full flex-col p-0">
+        <div className="flex border-b p-6">
           <p className="text-lg font-semibold text-black/80">PRICE DETAILS</p>
         </div>
-        <div className="flex flex-col gap-3 p-6">
+        <div className="flex h-full flex-col gap-3 p-6">
           <div className="flex justify-between">
             <p>Price ({totalQuantity} items)</p>
             <p className="">{formattedPrices.originaltotal}</p>
@@ -47,6 +48,9 @@ const CartSummary = ({ cart }: Props) => {
               You will save {formattedPrices.discount} on this order.
             </p>
           </div>
+        </div>
+        <div className="flex w-full items-center justify-center p-6">
+          <PlaceOrderButton cartId={cart.id} />
         </div>
       </CardContent>
     </Card>
