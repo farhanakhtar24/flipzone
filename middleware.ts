@@ -1,7 +1,6 @@
-import authConfig from "@/auth.config";
-import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { PAGE_ROUTES } from "./routes";
+import { auth } from "./auth";
 
 const protectedRoutes = [
   PAGE_ROUTES.CART,
@@ -10,9 +9,9 @@ const protectedRoutes = [
   PAGE_ROUTES.PRODUCTS,
 ];
 
-const { auth } = NextAuth(authConfig);
+// const { auth } = NextAuth(authConfig);
 
-export default auth(async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const session = await auth();
 
   const isProtected = protectedRoutes.some((route) =>
@@ -25,13 +24,8 @@ export default auth(async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

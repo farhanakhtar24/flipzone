@@ -8,7 +8,6 @@ import * as z from "zod";
 import { LoginSchema, SignUpSchema } from "@/schemas/auth";
 import { API_ROUTES, PAGE_ROUTES } from "@/routes";
 import { apiClient } from "@/util/axios";
-import { cookies } from "next/headers";
 
 export const login = async (provider: string) => {
   await signIn(provider, {
@@ -18,19 +17,10 @@ export const login = async (provider: string) => {
 };
 
 export const logout = async () => {
-  // Access the cookie store
-  const cookieStore = cookies();
-
-  // Delete both local and production cookies
-  cookieStore.delete("authjs.session-token"); // Local cookie
-  cookieStore.delete("__Secure-authjs.session-token"); // Secure cookie in production
-
-  // Proceed with the sign-out
   await signOut({
     redirectTo: PAGE_ROUTES.AUTH,
   });
 
-  // Revalidate the path after logout
   revalidatePath("/", "layout");
 };
 
