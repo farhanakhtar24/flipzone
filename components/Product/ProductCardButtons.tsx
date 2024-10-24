@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { wishlistItem } from "@/actions/wishlist.action";
 import { FiHeart } from "react-icons/fi";
+import { PAGE_ROUTES } from "@/routes";
 
 type BuyNowButtonProps = {
   productId: string;
@@ -39,7 +40,7 @@ const BuyNowButton = ({
     if (userId && productId) {
       setIsBuyingNow(true);
       await addToCart({ userId, productId });
-      router.push(`/cart`);
+      router.push(PAGE_ROUTES.CART);
       setIsBuyingNow(false);
     }
   };
@@ -84,14 +85,15 @@ const AddToCartButton = ({
       // raise a toast here
       if (error) {
         toast({
-          title: "Error",
-          description: message,
+          title: message,
+          description: error,
           variant: "destructive",
         });
-      } else if (message) {
+      }
+
+      if (message) {
         toast({
-          title: "Success",
-          description: message,
+          title: message,
           variant: "success",
         });
       }
@@ -127,7 +129,7 @@ const GoToCartButton = () => {
       size="lg"
       className="w-full"
       onClick={() => {
-        router.push("/cart");
+        router.push(PAGE_ROUTES.CART);
       }}
     >
       Go to Cart
@@ -150,14 +152,13 @@ const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
 
       if (error) {
         toast({
-          title: "Error",
-          description: message,
+          title: message,
+          description: error,
           variant: "destructive",
         });
       } else if (message) {
         toast({
-          title: "Success",
-          description: message,
+          title: message,
           variant: "success",
         });
       }

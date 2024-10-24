@@ -30,7 +30,7 @@ const page = async () => {
   if (!data) {
     return (
       <Wrapper>
-        <div>No products found</div>
+        <div>{message}</div>
       </Wrapper>
     );
   }
@@ -39,9 +39,7 @@ const page = async () => {
     console.log("message :", message);
   }
 
-  console.log({
-    data,
-  });
+  console.log({ data });
 
   return (
     <Wrapper>

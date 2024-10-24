@@ -1,4 +1,4 @@
-import { Product, Review } from "@prisma/client";
+import { Cart, CartItem, Product, Review } from "@prisma/client";
 
 export interface ApiResponse<T> {
   statusCode: number; // HTTP status code (e.g., 200, 404, 500)
@@ -12,5 +12,26 @@ export interface IproductWithCartStatus extends Product {
   isInCart: boolean;
   isWishlisted: boolean;
   isCompared?: boolean;
+  isOrdered?: boolean;
   reviews?: Review[];
+}
+
+// interfaces/cartInterface.ts
+
+// Interface for Cart Item with Product details
+export interface IcartItemWithProduct extends CartItem {
+  product: Product;
+}
+
+// Interface for Cart with Items
+export interface IcartWithItems extends Cart {
+  items: IcartItemWithProduct[];
+}
+
+export interface IcartSummary {
+  cart: IcartWithItems;
+  totalMRP: number;
+  totalDiscount: number;
+  finalPrice: number;
+  totalQuantity: number;
 }
