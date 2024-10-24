@@ -18,6 +18,7 @@ export const login = async (provider: string) => {
 
 export const logout = async () => {
   await signOut({
+    redirect: true,
     redirectTo: PAGE_ROUTES.AUTH,
   });
 
