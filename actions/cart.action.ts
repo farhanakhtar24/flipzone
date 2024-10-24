@@ -82,10 +82,13 @@ export const updateCartItemQuantity = async (
   try {
     // Start a transaction
     const result = await db.$transaction(async (prisma) => {
-      // Find the cart item first
+      // Find the cart item and product stock
       const cartItem = await prisma.cartItem.findUnique({
         where: {
           id: cartItemId,
+        },
+        include: {
+          product: true, // Include the related product to check its stock
         },
       });
 
@@ -136,25 +139,34 @@ export const updateCartItemQuantity = async (
           success: true,
           message: "Cart item removed from cart.",
         };
-      } else {
-        // Otherwise, update the cart item with the new quantity
-        await prisma.cartItem.update({
-          where: {
-            id: cartItemId,
-          },
-          data: {
-            quantity: newQuantity,
-          },
-        });
+      }
 
+      // Check if the new quantity exceeds available stock
+      if (newQuantity > cartItem.product.stock) {
         return {
-          statusCode: 200,
-          success: true,
-          message: `Cart item quantity ${
-            quantityChange > 0 ? "increased" : "decreased"
-          } successfully.`,
+          statusCode: 400,
+          success: false,
+          message: `Only ${cartItem.product.stock} items left in stock.`,
         };
       }
+
+      // Otherwise, update the cart item with the new quantity
+      await prisma.cartItem.update({
+        where: {
+          id: cartItemId,
+        },
+        data: {
+          quantity: newQuantity,
+        },
+      });
+
+      return {
+        statusCode: 200,
+        success: true,
+        message: `Cart item quantity ${
+          quantityChange > 0 ? "increased" : "decreased"
+        } successfully.`,
+      };
     });
 
     // Optionally, trigger any revalidation if necessary
@@ -189,19 +201,30 @@ export const placeOrderFromCart = async (
         include: {
           items: {
             include: {
-              product: true, // Include product details
+              product: true, // Include product details to adjust stock
             },
           },
         },
       });
 
-      // If the cart is not found, return a 404 response
+      // If the cart is not found or empty, return a 404 response
       if (!cart || cart.items.length === 0) {
         return {
           statusCode: 404,
           success: false,
           message: "Cart is empty or not found.",
         };
+      }
+
+      // Validate stock for each item before placing the order
+      for (const item of cart.items) {
+        if (item.quantity > item.product.stock) {
+          return {
+            statusCode: 400,
+            success: false,
+            message: `Insufficient stock for ${item.product.title}. Only ${item.product.stock} left.`,
+          };
+        }
       }
 
       // Create an order object with ordered items from the cart
@@ -226,7 +249,19 @@ export const placeOrderFromCart = async (
         },
       });
 
-      // After the order is created, delete the cart and its items
+      // After the order is created, update the product stock
+      for (const item of cart.items) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity, // Reduce stock by the ordered quantity
+            },
+          },
+        });
+      }
+
+      // Delete the cart and its items after the order is placed
       await prisma.cartItem.deleteMany({
         where: {
           cartId: cartId,

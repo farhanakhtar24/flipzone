@@ -20,6 +20,7 @@ type RemoveItemButtonProps = {
 };
 
 type QunatitySelectorInputsProps = {
+  stock: number;
   quantity: number;
   handleQuantityUpdate: (quantity: number) => void;
 };
@@ -102,6 +103,7 @@ const RemoveItemButton = ({
 const QunatitySelectorInputs = ({
   quantity,
   handleQuantityUpdate,
+  stock,
 }: QunatitySelectorInputsProps) => {
   return (
     <div className="flex w-[20%] items-center justify-start gap-2 xl:w-[15%] xl:justify-center">
@@ -120,6 +122,7 @@ const QunatitySelectorInputs = ({
       <button
         className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
         onClick={() => handleQuantityUpdate(1)}
+        disabled={stock === quantity}
       >
         <GoPlus />
       </button>

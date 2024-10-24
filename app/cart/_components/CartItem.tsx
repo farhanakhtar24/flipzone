@@ -82,6 +82,7 @@ const CartItem = ({ item }: Props) => {
         <QunatitySelectorInputs
           quantity={quantity}
           handleQuantityUpdate={handleQuantityUpdate}
+          stock={stock}
         />
         <RemoveItemButton
           handleQuantityUpdate={handleQuantityUpdate}
