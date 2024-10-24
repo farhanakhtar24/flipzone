@@ -12,6 +12,7 @@ export interface IproductWithCartStatus extends Product {
   isInCart: boolean;
   isWishlisted: boolean;
   isCompared?: boolean;
+  isOrdered?: boolean;
   reviews?: Review[];
 }
 

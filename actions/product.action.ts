@@ -181,6 +181,13 @@ export const getProductById = async (
             },
           },
         },
+        orderItems: {
+          where: {
+            order: {
+              userId,
+            },
+          },
+        },
         reviews: true,
       },
     });
@@ -198,6 +205,7 @@ export const getProductById = async (
     const isInCart = product.cartItems.length > 0;
     const isWishlisted = product.wishlistItems.length > 0;
     const isCompared = product.comparisonItems.length > 0;
+    const isOrdered = product.orderItems.length > 0;
 
     // Create a new product object that includes isInCart, isWishlisted, and isCompared
     const productWithCartStatus = {
@@ -205,6 +213,7 @@ export const getProductById = async (
       isInCart,
       isWishlisted,
       isCompared,
+      isOrdered,
     };
 
     // Return the product with the isInCart, isWishlisted, and isCompared properties included

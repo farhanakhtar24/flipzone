@@ -29,16 +29,6 @@ const page = async () => {
     );
   }
 
-  // if (!cartData) {
-  //   return (
-  //     <Wrapper>
-  //       <Card>
-  //         <CardContent className="p-6">{message}</CardContent>
-  //       </Card>
-  //     </Wrapper>
-  //   );
-  // }
-
   if (message) {
     console.log("message :", message);
   }
