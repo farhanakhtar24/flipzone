@@ -18,7 +18,9 @@ const PhotoSection = ({ product }: Props) => {
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const { images, isInCart, id, isWishlisted } = product;
+  const { images, isInCart, id, isWishlisted, stock, availabilityStatus } =
+    product;
+
   const [currentImage, setCurrentImage] = useState(images[0]);
   return (
     <div className="relative flex w-full">
@@ -57,19 +59,25 @@ const PhotoSection = ({ product }: Props) => {
           />
         </div>
         <div className="flex items-center gap-5">
-          <BuyNowButton
-            productId={id}
-            isBuyingNow={isBuyingNow}
-            setIsBuyingNow={setIsBuyingNow}
-          />
-          {isInCart ? (
-            <GoToCartButton />
+          {stock <= 0 ? (
+            <span className="text-red-500">{availabilityStatus}</span>
           ) : (
-            <AddToCartButton
-              productId={id}
-              isAddingToCart={isAddingToCart}
-              setIsAddingToCart={setIsAddingToCart}
-            />
+            <>
+              <BuyNowButton
+                productId={id}
+                isBuyingNow={isBuyingNow}
+                setIsBuyingNow={setIsBuyingNow}
+              />
+              {isInCart ? (
+                <GoToCartButton />
+              ) : (
+                <AddToCartButton
+                  productId={id}
+                  isAddingToCart={isAddingToCart}
+                  setIsAddingToCart={setIsAddingToCart}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

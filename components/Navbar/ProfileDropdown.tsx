@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { logout } from "@/actions/auth.action";
 import { NavLinks } from "@/constant/NavLinks";
+import { MdOutlineShoppingCart } from "react-icons/md";
+import { LuPackage } from "react-icons/lu";
 
 type Props = {
   name: string | null | undefined;
@@ -38,10 +40,16 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
         <DropdownMenuLabel>{name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link href={NavLinks.cart}>
-          <DropdownMenuItem className="cursor-pointer">Cart</DropdownMenuItem>
+          <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+            <MdOutlineShoppingCart />
+            Cart
+          </DropdownMenuItem>
         </Link>
         <Link href={NavLinks.orders}>
-          <DropdownMenuItem className="cursor-pointer">Orders</DropdownMenuItem>
+          <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+            <LuPackage />
+            Orders
+          </DropdownMenuItem>
         </Link>
         <DropdownMenuItem
           onClick={() => logout()}

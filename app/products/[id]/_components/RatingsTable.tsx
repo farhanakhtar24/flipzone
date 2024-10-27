@@ -1,18 +1,26 @@
+"use client";
 import React from "react";
-import { IoIosStar } from "react-icons/io";
-import RatingBox from "@/components/RatingBox/RatingBox";
 import dayjs from "dayjs";
+import { IoIosStar } from "react-icons/io";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
+import CustomRateReviewBox from "./CustomRateReviewBox";
+import ReviewItem from "./ReviewItem";
 
 type Props = {
   product: IproductWithCartStatus;
 };
 
 const RatingsTable = ({ product }: Props) => {
-  let { rating, reviews } = product;
+  let { rating, reviews, isOrdered, id } = product;
 
+  id = id ?? "";
   rating = rating ?? 0;
   reviews = reviews ?? [];
+  isOrdered = isOrdered ?? false;
+
+  const sortedReviews = [...reviews]
+    .sort((a, b) => dayjs(b.date).diff(dayjs(a.date)))
+    .slice(0, 3);
 
   return (
     <div className="mt-5 flex h-full w-full flex-col divide-y border">
@@ -28,21 +36,10 @@ const RatingsTable = ({ product }: Props) => {
           </div>
         </div>
       </div>
-      {reviews &&
-        reviews.map((review, index) => {
-          const { comment, rating, reviewerName, date } = review;
-
-          const newdate = dayjs(date).format("MMM, YYYY");
-
-          return (
-            <div className="flex w-full flex-col gap-3 p-5" key={index}>
-              <RatingBox rating={rating} />
-              <p className="text-sm">{comment}</p>
-              <p className="text-xs font-medium text-gray-400">
-                {reviewerName} - {newdate}
-              </p>
-            </div>
-          );
+      {isOrdered && <CustomRateReviewBox productId={id} />}
+      {sortedReviews &&
+        sortedReviews.map((review, index) => {
+          return <ReviewItem key={index} review={review} productId={id} />;
         })}
     </div>
   );
