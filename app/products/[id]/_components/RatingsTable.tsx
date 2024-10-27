@@ -2,9 +2,9 @@
 import React from "react";
 import dayjs from "dayjs";
 import { IoIosStar } from "react-icons/io";
-import RatingBox from "@/components/RatingBox/RatingBox";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 import CustomRateReviewBox from "./CustomRateReviewBox";
+import ReviewItem from "./ReviewItem";
 
 type Props = {
   product: IproductWithCartStatus;
@@ -39,19 +39,7 @@ const RatingsTable = ({ product }: Props) => {
       {isOrdered && <CustomRateReviewBox productId={id} />}
       {sortedReviews &&
         sortedReviews.map((review, index) => {
-          const { comment, rating, reviewerName, date } = review;
-
-          const newdate = dayjs(date).format("MMM, YYYY");
-
-          return (
-            <div className="flex w-full flex-col gap-3 p-5" key={index}>
-              <RatingBox rating={rating} />
-              <p className="text-sm">{comment}</p>
-              <p className="text-xs font-medium text-gray-400">
-                {reviewerName} - {newdate}
-              </p>
-            </div>
-          );
+          return <ReviewItem key={index} review={review} productId={id} />;
         })}
     </div>
   );

@@ -19,4 +19,5 @@ export const ReviewSchema = z.object({
     required_error: "Product ID is required",
     invalid_type_error: "Product ID must be a string",
   }),
+  reviewId: z.string().optional(),
 });

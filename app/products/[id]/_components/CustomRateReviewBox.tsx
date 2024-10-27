@@ -18,14 +18,26 @@ import { ReviewSchema } from "@/schemas/product"; // Import your Zod schema
 import { useSession } from "next-auth/react";
 import FormError from "@/components/ui/form-error";
 import { useToast } from "@/hooks/use-toast";
-import { addReview } from "@/actions/reviews.action";
+import { addReview, editReview } from "@/actions/reviews.action";
 import Spinner from "@/components/ui/spinner";
 
 type Props = {
   productId: string;
+  isEditing?: boolean;
+  comment?: string;
+  rating?: number;
+  reviewId?: string;
+  setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const CustomRateReviewBox = ({ productId }: Props) => {
+const CustomRateReviewBox = ({
+  productId,
+  comment,
+  isEditing,
+  rating,
+  reviewId,
+  setIsEditing,
+}: Props) => {
   const { data: session } = useSession();
   const [hoverRating, setHoverRating] = useState(0);
   const [error, setError] = useState<string>("");
@@ -36,32 +48,56 @@ const CustomRateReviewBox = ({ productId }: Props) => {
   const form = useForm<z.infer<typeof ReviewSchema>>({
     resolver: zodResolver(ReviewSchema),
     defaultValues: {
-      rating: 0,
-      comment: "",
+      rating: rating ? rating : 0,
+      comment: comment ? comment : "",
       reviewerEmail: session?.user?.email || "",
       reviewerName: session?.user?.name || "",
       productId: productId,
+      reviewId: reviewId,
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof ReviewSchema>) => {
     setLoading(true);
 
-    const { message, error } = await addReview(values);
+    if (!isEditing) {
+      const { message, error } = await addReview(values);
 
-    if (error) {
-      setError(message);
+      if (error) {
+        setError(message);
 
-      toast({
-        title: message,
-        description: error,
-        variant: "destructive",
-      });
+        toast({
+          title: message,
+          description: error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: message,
+          variant: "success",
+        });
+      }
     } else {
-      toast({
-        title: message,
-        variant: "success",
-      });
+      if (values.reviewId && setIsEditing) {
+        const { message, error } = await editReview(values);
+
+        if (error) {
+          setError(message);
+
+          toast({
+            title: message,
+            description: error,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: message,
+            variant: "success",
+          });
+
+          setIsEditing(false);
+        }
+      }
     }
 
     setLoading(false);
@@ -111,22 +147,38 @@ const CustomRateReviewBox = ({ productId }: Props) => {
                     />
                   ))}
                 </div>
-                <Button
-                  size={"lg"}
-                  style={{
-                    margin: "0",
-                  }}
-                  type="submit"
-                  disabled={!form.formState.isValid}
-                >
-                  {loading ? (
-                    <div className="h-5 w-5">
-                      <Spinner className="text-white" />
-                    </div>
-                  ) : (
-                    <>Submit</>
+                <div className="flex items-center gap-3">
+                  {isEditing && (
+                    <Button
+                      size={"lg"}
+                      style={{
+                        margin: "0",
+                      }}
+                      onClick={() => {
+                        if (setIsEditing) setIsEditing(false);
+                      }}
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      Cancel
+                    </Button>
                   )}
-                </Button>
+                  <Button
+                    size={"lg"}
+                    style={{
+                      margin: "0",
+                    }}
+                    type="submit"
+                    disabled={!form.formState.isValid}
+                  >
+                    {loading ? (
+                      <div className="h-5 w-5">
+                        <Spinner className="text-white" />
+                      </div>
+                    ) : (
+                      <>Submit</>
+                    )}
+                  </Button>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
