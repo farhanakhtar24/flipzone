@@ -6,7 +6,14 @@ import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
-const page = async () => {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+const page = async ({ searchParams }: Props) => {
+  const { search } = await searchParams;
+  console.log("search :", search);
+
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -39,7 +46,7 @@ const page = async () => {
     console.log("message :", message);
   }
 
-  console.log({ data });
+  // console.log({ data });
 
   return (
     <Wrapper>

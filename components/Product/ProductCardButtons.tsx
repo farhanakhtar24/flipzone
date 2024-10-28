@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { wishlistItem } from "@/actions/wishlist.action";
 import { FiHeart } from "react-icons/fi";
 import { PAGE_ROUTES } from "@/routes";
