@@ -3,6 +3,7 @@ import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
 import ProductGrid from "./_components/ProductGrid";
 import { auth } from "@/auth";
+import Filters from "./_components/Filters";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,25 @@ type Props = {
 };
 
 const page = async ({ searchParams }: Props) => {
-  const { search } = await searchParams;
-  console.log("search :", search);
+  const {
+    search,
+    priceRange,
+    rating,
+    discountPercentage,
+    brand,
+    category,
+    sortBy,
+  } = await searchParams;
+
+  const filters = {
+    search,
+    priceRange,
+    rating,
+    discountPercentage,
+    brand,
+    category,
+    sortBy,
+  };
 
   const session = await auth();
 
@@ -46,12 +64,13 @@ const page = async ({ searchParams }: Props) => {
     console.log("message :", message);
   }
 
-  // console.log({ data });
+  console.log({ data });
 
   return (
-    <Wrapper>
+    <section className="flex h-full w-full gap-5 px-5">
+      <Filters filters={filters} />
       <ProductGrid products={data} />
-    </Wrapper>
+    </section>
   );
 };
 
