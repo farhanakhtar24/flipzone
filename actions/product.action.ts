@@ -4,14 +4,63 @@ import {
   ApiResponse,
   IproductWithCartStatus,
 } from "@/interfaces/actionInterface";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export const getAllProducts = async (
   userId: string,
+  filters?: {
+    search?: string;
+    priceRange?: [number, number];
+    rating?: number;
+    discountPercentage?: number;
+    brand?: string;
+    category?: string;
+    sortBy?: string;
+  },
 ): Promise<ApiResponse<IproductWithCartStatus[]>> => {
   try {
+    // Build the where clause based on filters
+    const where: Prisma.ProductWhereInput = {
+      ...(filters?.search && {
+        OR: [
+          { title: { contains: filters.search, mode: "insensitive" } },
+          { description: { contains: filters.search, mode: "insensitive" } },
+        ],
+      }),
+      ...(filters?.priceRange && {
+        price: {
+          gte: filters.priceRange[0],
+          lte: filters.priceRange[1],
+        },
+      }),
+      ...(filters?.rating && {
+        rating: { gte: filters.rating },
+      }),
+      ...(filters?.discountPercentage && {
+        discountPercentage: { gte: filters.discountPercentage },
+      }),
+      ...(filters?.brand && {
+        brand: { equals: filters.brand },
+      }),
+      ...(filters?.category && {
+        category: { equals: filters.category },
+      }),
+    };
+
+    // Inside getAllProducts function, replace the orderBy construction with:
+    const [sortField, sortDirection] = (filters?.sortBy?.split(":") || [
+      "rating",
+      "desc",
+    ]) as [string, "asc" | "desc"];
+    const orderBy = {
+      [sortField]: sortDirection,
+    };
+
     // Fetch products with cart item and wishlist item info for checking user status
     const products = await db.product.findMany({
+      where,
+      orderBy,
       include: {
         cartItems: {
           where: {
@@ -20,7 +69,7 @@ export const getAllProducts = async (
             },
           },
           select: {
-            id: true, // Only fetch necessary fields to check if the product is in the cart
+            id: true,
           },
         },
         wishlistItems: {
@@ -30,7 +79,7 @@ export const getAllProducts = async (
             },
           },
           select: {
-            id: true, // Only fetch necessary fields to check if the product is in the wishlist
+            id: true,
           },
         },
       },
@@ -40,8 +89,8 @@ export const getAllProducts = async (
     const productsWithCartStatus = products.map(
       ({ cartItems, wishlistItems, ...product }) => ({
         ...product,
-        isInCart: cartItems.length > 0, // Check if the product is in the user's cart
-        isWishlisted: wishlistItems.length > 0, // Check if the product is in the user's wishlist
+        isInCart: cartItems.length > 0,
+        isWishlisted: wishlistItems.length > 0,
       }),
     );
 

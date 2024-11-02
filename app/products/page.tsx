@@ -3,34 +3,34 @@ import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
 import ProductGrid from "./_components/ProductGrid";
 import { auth } from "@/auth";
-import Filters from "./_components/Filters";
+import FilterSection from "./_components/Filters/FilterSection";
 
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 const page = async ({ searchParams }: Props) => {
-  const {
-    search,
-    priceRange,
-    rating,
-    discountPercentage,
-    brand,
-    category,
-    sortBy,
-  } = await searchParams;
-
   const filters = {
-    search,
-    priceRange,
-    rating,
-    discountPercentage,
-    brand,
-    category,
-    sortBy,
+    search: searchParams.search as string | undefined,
+    priceRange: searchParams.priceRange
+      ? (searchParams.priceRange
+          .toString()
+          .replace(/[\[\]]/g, "")
+          .split(",")
+          .map(Number) as [number, number])
+      : undefined,
+    rating: searchParams.rating ? Number(searchParams.rating) : undefined,
+    discountPercentage: searchParams.discountPercentage
+      ? Number(searchParams.discountPercentage)
+      : undefined,
+    brand: searchParams.brand as string | undefined,
+    category: searchParams.category as string | undefined,
+    sortBy: searchParams.sortBy as string | undefined,
   };
+
+  console.log("filters :", filters);
 
   const session = await auth();
 
@@ -42,7 +42,10 @@ const page = async ({ searchParams }: Props) => {
     );
   }
 
-  const { data, error, message } = await getAllProducts(session.user.id);
+  const { data, error, message } = await getAllProducts(
+    session.user.id,
+    filters,
+  );
 
   if (error) {
     return (
@@ -64,11 +67,9 @@ const page = async ({ searchParams }: Props) => {
     console.log("message :", message);
   }
 
-  console.log({ data });
-
   return (
     <section className="flex h-full w-full gap-5 px-5">
-      <Filters filters={filters} />
+      <FilterSection />
       <ProductGrid products={data} />
     </section>
   );
