@@ -61,7 +61,7 @@ const ProductsCard = ({ product }: Props) => {
         <CardContent className="flex h-full flex-col space-y-2">
           <p className="flex flex-grow flex-col gap-1 text-lg font-semibold text-black/80">
             {title}
-            <span className="text-sm text-gray-500">by {brand}</span>
+            {brand && <span className="text-sm text-gray-500">by {brand}</span>}
           </p>
           <div className="flex items-baseline gap-3">
             <CardTitle className="text-2xl font-bold">

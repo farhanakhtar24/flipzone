@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { PAGE_ROUTES } from "@/routes";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { AiFillThunderbolt } from "react-icons/ai";
 import { FiMinus } from "react-icons/fi";
