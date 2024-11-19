@@ -13,11 +13,7 @@ const FilterSection = () => {
       <CardHeader className="flex w-full flex-col gap-2">
         <CardTitle>Filters</CardTitle>
       </CardHeader>
-      <Accordion
-        type="multiple"
-        className="w-full divide-y"
-        defaultValue={["Price"]}
-      >
+      <Accordion type="multiple" className="w-full divide-y">
         <FillterAccordianItem title="Price">
           <PriceSlider />
         </FillterAccordianItem>
