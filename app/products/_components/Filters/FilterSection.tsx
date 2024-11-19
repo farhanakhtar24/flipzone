@@ -4,6 +4,7 @@ import { Accordion } from "@/components/ui/accordion";
 import FillterAccordianItem from "./FillterAccordianItem";
 import PriceSlider from "./PriceSlider";
 import SortBy from "./SortBy";
+import InStock from "./InStock";
 // import TaggedFilters from "./TaggedFilters";
 
 const FilterSection = () => {
@@ -22,6 +23,9 @@ const FilterSection = () => {
         </FillterAccordianItem>
         <FillterAccordianItem title="Sort-By">
           <SortBy />
+        </FillterAccordianItem>
+        <FillterAccordianItem title="In-Stock">
+          <InStock />
         </FillterAccordianItem>
       </Accordion>
     </Card>

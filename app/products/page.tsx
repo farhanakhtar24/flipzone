@@ -28,6 +28,7 @@ const page = async ({ searchParams }: Props) => {
     brand: searchParams.brand as string | undefined,
     category: searchParams.category as string | undefined,
     sortBy: searchParams.sortBy as string | undefined,
+    inStock: searchParams.inStock as string | undefined,
   };
 
   console.log("filters :", filters);

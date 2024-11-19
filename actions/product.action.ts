@@ -17,6 +17,7 @@ export const getAllProducts = async (
     brand?: string;
     category?: string;
     sortBy?: string;
+    inStock?: string;
   },
 ): Promise<ApiResponse<IproductWithCartStatus[]>> => {
   try {
@@ -45,6 +46,9 @@ export const getAllProducts = async (
       }),
       ...(filters?.category && {
         category: { equals: filters.category },
+      }),
+      ...(filters?.inStock && {
+        stock: { gte: filters.inStock === "true" ? 1 : 0 },
       }),
     };
 
