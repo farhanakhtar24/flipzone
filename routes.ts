@@ -4,6 +4,9 @@ export const PAGE_ROUTES = {
   CATEGORIES: "/categories",
   CART: "/cart",
   ORDERS: "/orders",
+  PROFILE: "/profile",
+  WISHLIST: "/wishlist",
+  COMPARE: "/compare",
 };
 
 export const API_ROUTES = {

@@ -7,6 +7,7 @@ const protectedRoutes = [
   PAGE_ROUTES.CATEGORIES,
   PAGE_ROUTES.ORDERS,
   PAGE_ROUTES.PRODUCTS,
+  PAGE_ROUTES.PROFILE,
 ];
 
 export default async function middleware(request: NextRequest) {
