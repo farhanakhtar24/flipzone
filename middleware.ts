@@ -9,8 +9,6 @@ const protectedRoutes = [
   PAGE_ROUTES.PRODUCTS,
 ];
 
-// const { auth } = NextAuth(authConfig);
-
 export default async function middleware(request: NextRequest) {
   const session = await auth();
 

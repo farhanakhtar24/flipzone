@@ -28,13 +28,18 @@ const CategoryDropdown = () => {
         <div className="grid grid-cols-2">
           {loading && <div>Loading...</div>}
           {error && <div>Error: {error}</div>}
-          {categories.map((category) => (
-            <Link href={`/products/${category.name}`} key={category.id}>
-              <DropdownMenuItem className="cursor-pointer">
-                {category.name}
-              </DropdownMenuItem>
-            </Link>
-          ))}
+          {categories
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((category) => (
+              <Link
+                href={`/products?category=${category.name}`}
+                key={category.id}
+              >
+                <DropdownMenuItem className="cursor-pointer">
+                  {category.name}
+                </DropdownMenuItem>
+              </Link>
+            ))}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

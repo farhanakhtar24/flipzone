@@ -45,7 +45,13 @@ export const getAllProducts = async (
         brand: { equals: filters.brand },
       }),
       ...(filters?.category && {
-        category: { equals: filters.category },
+        categories: {
+          some: {
+            category: {
+              name: { equals: filters.category },
+            },
+          },
+        },
       }),
       ...(filters?.inStock && {
         stock: { gte: filters.inStock === "true" ? 1 : 0 },
