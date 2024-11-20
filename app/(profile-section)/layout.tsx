@@ -11,7 +11,7 @@ export default function ProfileLayout({
     <section className="flex h-full w-full gap-5 px-5">
       <Sidebar />
       <Wrapper>
-        <Card className="flex h-[77vh] w-full flex-col overflow-y-auto p-5">
+        <Card className="flex h-[77vh] w-full flex-col overflow-y-auto">
           {children}
         </Card>
       </Wrapper>

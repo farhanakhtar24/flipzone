@@ -13,7 +13,7 @@ export const getUserOrders = async (
         userId,
       },
       orderBy: {
-        id: "asc",
+        id: "desc",
       }, // Change to "desc" for reverse order
       include: {
         items: {

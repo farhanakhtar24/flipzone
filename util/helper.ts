@@ -53,3 +53,15 @@ export const originalPriceGetter = (
 ) => {
   return Number((price / (1 - discountPercentage / 100)).toFixed(2));
 };
+
+export const timeFormatter = (date: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  };
+
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+};

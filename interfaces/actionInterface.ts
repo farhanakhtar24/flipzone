@@ -34,10 +34,14 @@ export interface IcartSummary {
   totalQuantity: number;
 }
 
+export interface IorderedItemWithProduct extends OrderedItem {
+  product: Product;
+}
+
 export interface IOrderSummary {
   orderId: string;
   status: string;
   total: number;
   placedAt: Date;
-  items: OrderedItem[];
+  items: IorderedItemWithProduct[];
 }
