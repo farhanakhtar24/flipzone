@@ -8,9 +8,11 @@ import SearchBar from "./SearchBar";
 import { PAGE_ROUTES } from "@/routes";
 import { NavLinks } from "@/constant/NavLinks";
 import CategoryDropdown from "./CategoryDropdown";
+import { getUserById } from "@/actions/user.action";
 
 const Navbar = async () => {
   const session = await auth();
+  const user = await getUserById(session?.user?.id as string);
 
   return (
     <nav className="sticky top-0 z-50 flex w-full items-center border-b bg-background px-5 xl:px-0">
@@ -39,10 +41,7 @@ const Navbar = async () => {
                 All Products
               </Link>
               <CategoryDropdown />
-              <ProfileDropdown
-                name={session?.user?.name}
-                imgUrl={session?.user?.image}
-              />
+              <ProfileDropdown name={user?.name} imgUrl={user?.image} />
             </>
           )}
         </div>
