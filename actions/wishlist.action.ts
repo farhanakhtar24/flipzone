@@ -5,7 +5,9 @@ import { ApiResponse } from "@/interfaces/actionInterface";
 import { revalidatePath } from "next/cache";
 import { IWishlistSummary } from "@/interfaces/actionInterface";
 
-export const getWishlistByUserId = async (userId: string) => {
+export const getWishlistByUserId = async (
+  userId: string,
+): Promise<ApiResponse<IWishlistSummary>> => {
   try {
     // Fetch the user's wishlist from the database, including items and their associated products
     const wishlist = await db.wishlist.findUnique({
