@@ -1,4 +1,11 @@
-import { Cart, CartItem, OrderedItem, Product, Review } from "@prisma/client";
+import {
+  Cart,
+  CartItem,
+  OrderedItem,
+  Product,
+  Review,
+  WishlistItem,
+} from "@prisma/client";
 
 export interface ApiResponse<T> {
   statusCode: number; // HTTP status code (e.g., 200, 404, 500)
@@ -44,4 +51,13 @@ export interface IOrderSummary {
   total: number;
   placedAt: Date;
   items: IorderedItemWithProduct[];
+}
+
+export interface IWishlistItemWithProduct extends WishlistItem {
+  product: Product;
+}
+
+export interface IWishlistSummary {
+  wishlistId: string;
+  items: IWishlistItemWithProduct[];
 }

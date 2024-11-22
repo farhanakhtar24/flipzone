@@ -13,11 +13,19 @@ const page = async () => {
   const { data, error, message } = await getUserOrders(session.user.id);
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        {error}
+      </div>
+    );
   }
 
   if (!data) {
-    return <div>{message}</div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        {message}
+      </div>
+    );
   }
 
   if (message) {
