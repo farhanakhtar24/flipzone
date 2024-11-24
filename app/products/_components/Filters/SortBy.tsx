@@ -21,7 +21,7 @@ const sortOptions = [
 const SortBy = () => {
   const [sortBy, setSortBy] = useQueryParam({
     key: "sortBy",
-    defaultValue: "price:asc",
+    defaultValue: "rating:desc",
     parser: (params) => params.get("sortBy") || "rating:desc",
     serializer: (value: string) => value,
   });

@@ -16,7 +16,7 @@ import {
 } from "./ProductCardButtons";
 import { LuExternalLink } from "react-icons/lu";
 import Link from "next/link";
-import { priceFormatter } from "@/util/helper";
+import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import RatingBox from "../RatingBox/RatingBox";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
 
@@ -42,6 +42,7 @@ const ProductsCard = ({ product }: Props) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const formattedPrice = priceFormatter(price);
+  const originalPrice = originalPriceGetter(price, discountPercentage || 0);
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -67,6 +68,9 @@ const ProductsCard = ({ product }: Props) => {
             <CardTitle className="text-2xl font-bold">
               {formattedPrice}
             </CardTitle>
+            <p className="text-sm text-gray-500 line-through">
+              {originalPrice}
+            </p>
             {discountPercentage && (
               <p className="text-sm font-semibold text-green-700">
                 {discountPercentage}% off

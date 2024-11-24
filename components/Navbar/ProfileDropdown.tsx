@@ -14,6 +14,7 @@ import { logout } from "@/actions/auth.action";
 import { NavLinks } from "@/constant/NavLinks";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { LuPackage } from "react-icons/lu";
+import { FaRegHeart } from "react-icons/fa";
 
 type Props = {
   name: string | null | undefined;
@@ -37,12 +38,22 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="space-y-1">
-        <DropdownMenuLabel>{name}</DropdownMenuLabel>
+        <Link href={NavLinks.profile}>
+          <DropdownMenuLabel className="flex cursor-pointer items-center gap-2">
+            {name}
+          </DropdownMenuLabel>
+        </Link>
         <DropdownMenuSeparator />
         <Link href={NavLinks.cart}>
           <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
             <MdOutlineShoppingCart />
             Cart
+          </DropdownMenuItem>
+        </Link>
+        <Link href={NavLinks.wishlist}>
+          <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+            <FaRegHeart />
+            Wishlist
           </DropdownMenuItem>
         </Link>
         <Link href={NavLinks.orders}>
