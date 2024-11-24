@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import React from "react";
 import ProfileSettings from "./_components/ProfileSettings";
 
+export const dynamic = "force-dynamic";
+
 const page = async () => {
   const session = await auth();
 
