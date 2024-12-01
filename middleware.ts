@@ -8,6 +8,8 @@ const protectedRoutes = [
   PAGE_ROUTES.ORDERS,
   PAGE_ROUTES.PRODUCTS,
   PAGE_ROUTES.PROFILE,
+  PAGE_ROUTES.WISHLIST,
+  PAGE_ROUTES.COMPARE,
 ];
 
 export default async function middleware(request: NextRequest) {
