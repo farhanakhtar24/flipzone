@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: flipzone
+    # Prisma requires a replica set for transactions; convert a standalone
+    # instance into a single-node replica set on first boot.
+    command: >
+      bash -c "mongod --replSet rs0 --bind_ip_all &
+      until mongosh --quiet --eval 'db.runCommand({ ping: 1 })' >/dev/null 2>&1; do sleep 1; done;
+      mongosh --quiet --eval 'try { rs.status().ok } catch { rs.initiate() }';
+      wait"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/flipzone?replicaSet=rs0&directConnection=true
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+volumes:
+  mongo-data:
