@@ -564,30 +564,36 @@ export const getHomeRails = async (
         take: 10,
         include: statusInclude,
       }),
-      // categories the user engaged with (recently-viewed ids take priority,
-      // else their ordered/wishlisted categories)
+      // Categories the user engaged with. Two flat queries instead of a single
+      // relation-OR: over MongoDB, `product: { orderItems: { some... } } OR
+      // { wishlistItems: { some... } }` emits a $size aggregation that errors
+      // (code 17124) whenever the user has a null relation array on one side.
       recentIds.length
         ? db.productCategory.findMany({
             where: { productId: { in: recentIds } },
             select: { categoryId: true },
           })
-        : db.productCategory.findMany({
-            where: {
-              OR: [
-                {
-                  product: {
-                    orderItems: { some: { order: { userId } } },
-                  },
-                },
-                {
-                  product: {
-                    wishlistItems: { some: { wishlist: { userId } } },
-                  },
-                },
-              ],
-            },
-            select: { categoryId: true },
-          }),
+        : (async () => {
+            const [ordered, wishlisted] = await Promise.all([
+              db.order.findMany({
+                where: { userId },
+                select: { items: { select: { productId: true } } },
+              }),
+              db.wishlistItem.findMany({
+                where: { wishlist: { userId } },
+                select: { productId: true },
+              }),
+            ]);
+            const productIds = [
+              ...ordered.flatMap((o) => o.items.map((i) => i.productId)),
+              ...wishlisted.map((w) => w.productId),
+            ];
+            if (!productIds.length) return [] as { categoryId: string }[];
+            return db.productCategory.findMany({
+              where: { productId: { in: productIds } },
+              select: { categoryId: true },
+            });
+          })(),
     ]);
 
     let recommended: IproductWithCartStatus[] = [];
