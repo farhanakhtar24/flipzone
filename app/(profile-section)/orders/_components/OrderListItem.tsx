@@ -1,27 +1,15 @@
+"use client";
 import React from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { IOrderSummary } from "@/interfaces/actionInterface";
-import { cn } from "@/lib/utils";
 import { priceFormatter, timeFormatter } from "@/util/helper";
 import CancelOrderButton from "./CancelOrderButton";
 import OrderedItem from "./OrderedItem";
+import OrderStepper from "./OrderStepper";
+import { ChevronDown, Package } from "lucide-react";
+import Image from "next/image";
 
 type Props = {
   order: IOrderSummary;
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: "text-amber-600",
-  PLACED: "text-blue-600",
-  PAID: "text-green-600",
-  SHIPPED: "text-indigo-600",
-  DELIVERED: "text-green-700",
-  CANCELLED: "text-destructive",
 };
 
 const OrderListItem = ({ order }: Props) => {
@@ -32,40 +20,81 @@ const OrderListItem = ({ order }: Props) => {
     status: orderStatus,
     items: orderItems,
   } = order;
+
+  const [expanded, setExpanded] = React.useState(false);
+
   return (
-    <div className="flex flex-col gap-3 border-b p-5">
-      <div className="flex flex-col justify-between sm:flex-row">
-        <div className="text-lg font-semibold">Order ID: #{id.slice(-8)}</div>
-        <div className="flex gap-3">{timeFormatter(createdAt)}</div>
+    <div className="bg-card overflow-hidden rounded-xl border">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-lg">
+            <Package className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="font-semibold">Order #{id.slice(-8)}</p>
+            <p className="text-muted-foreground text-xs">
+              {timeFormatter(createdAt)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-lg font-bold">{priceFormatter(total)}</p>
+            <p className="text-muted-foreground text-xs">
+              {orderItems.length}{" "}
+              {orderItems.length === 1 ? "item" : "items"}
+            </p>
+          </div>
+          <CancelOrderButton orderId={id} status={orderStatus} />
+        </div>
       </div>
-      <div className="flex flex-col justify-between sm:flex-row">
-        <div className="text-xl font-bold">Total: {priceFormatter(total)}</div>
-        <div>Total Items: {orderItems.length}</div>
+
+      {/* Stepper */}
+      <div className="px-5 py-4">
+        <OrderStepper status={orderStatus} />
       </div>
-      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <div>
-          Status:{" "}
-          <span
-            className={cn(
-              "font-bold uppercase",
-              STATUS_STYLES[orderStatus] ?? "text-muted-foreground",
+
+      {/* Thumbnail strip + expand */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="hover:bg-muted/50 flex w-full items-center justify-between border-t px-5 py-3 text-left transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex -space-x-2">
+            {orderItems.slice(0, 4).map((item) =>
+              item.thumbnail ? (
+                <Image
+                  key={item.id}
+                  src={item.thumbnail}
+                  alt={item.title}
+                  width={36}
+                  height={36}
+                  className="border-background h-9 w-9 rounded-full border-2 object-cover"
+                />
+              ) : null,
             )}
-          >
-            {orderStatus}
+          </div>
+          <span className="text-muted-foreground text-sm">
+            {expanded ? "Hide items" : "View items"}
           </span>
         </div>
-        <CancelOrderButton orderId={id} status={orderStatus} />
-      </div>
-      <Accordion type="single" collapsible>
-        <AccordionItem value="item-1" className="border-0">
-          <AccordionTrigger className="py-2">Products</AccordionTrigger>
-          <AccordionContent className="grid w-full grid-cols-1 gap-5 p-0 lg:grid-cols-2">
-            {orderItems.map((item) => {
-              return <OrderedItem key={item.id} item={item} />;
-            })}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${
+            expanded ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {expanded && (
+        <div className="grid grid-cols-1 gap-4 border-t bg-secondary/40 p-5 lg:grid-cols-2">
+          {orderItems.map((item) => (
+            <OrderedItem key={item.id} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

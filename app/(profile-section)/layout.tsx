@@ -1,5 +1,5 @@
+import Wrapper from "@/components/Wrapper/Wrapper";
 import Sidebar from "./_components/Sidebar/Sidebar";
-import { Card } from "@/components/ui/card";
 
 export default function ProfileLayout({
   children,
@@ -7,11 +7,11 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <section className="flex h-full w-full flex-col gap-5 px-5 md:flex-row">
-      <Sidebar />
-      <Card className="flex h-auto min-h-[60vh] w-full flex-col overflow-y-auto md:h-[77vh]">
-        {children}
-      </Card>
-    </section>
+    <Wrapper>
+      <section className="flex w-full flex-col gap-6 py-8 md:flex-row">
+        <Sidebar />
+        <div className="min-w-0 flex-1">{children}</div>
+      </section>
+    </Wrapper>
   );
 }
