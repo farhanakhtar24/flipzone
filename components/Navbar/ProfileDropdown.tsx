@@ -24,7 +24,7 @@ type Props = {
 const ProfileDropdown = ({ name, imgUrl }: Props) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger aria-label="Open profile menu">
         <div className="flex items-center gap-x-2 text-sm">
           <Avatar className="border border-slate-700">
             <AvatarImage src={imgUrl ?? ""} />
@@ -44,6 +44,16 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
           </DropdownMenuLabel>
         </Link>
         <DropdownMenuSeparator />
+        <Link href={NavLinks.products} className="md:hidden">
+          <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+            All Products
+          </DropdownMenuItem>
+        </Link>
+        <Link href={NavLinks.categories} className="md:hidden">
+          <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+            Categories
+          </DropdownMenuItem>
+        </Link>
         <Link href={NavLinks.cart}>
           <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
             <MdOutlineShoppingCart />

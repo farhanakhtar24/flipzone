@@ -28,11 +28,13 @@ const OrderedItem = ({ item }: Props) => {
         <div className="flex w-[85%] flex-col justify-between">
           <p className="text-xl font-semibold">{title}</p>
           <div className="flex w-full flex-col gap-2">
-            <p className="text-sm text-gray-600">Quantity: {quantity}</p>
+            <p className="text-sm text-muted-foreground">
+              Quantity: {quantity}
+            </p>
             <div className="flex items-baseline gap-3">
               <CardTitle>{formattedPrice}</CardTitle>
               {originalPrice > 0 && (
-                <p className="text-sm text-gray-500 line-through">
+                <p className="text-sm text-muted-foreground line-through">
                   {originalPrice.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",

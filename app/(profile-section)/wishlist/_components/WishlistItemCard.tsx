@@ -57,12 +57,14 @@ const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
         className="w-full object-cover"
       />
       <div className="flex h-full flex-col space-y-2">
-        <p className="flex flex-grow flex-col gap-1 text-base font-semibold text-black/80">
+        <p className="flex flex-grow flex-col gap-1 text-base font-semibold">
           {title}
         </p>
         <div className="flex items-baseline gap-3">
           <CardTitle className="text-xl font-bold">{formattedPrice}</CardTitle>
-          <p className="text-sm text-gray-500 line-through">{originalPrice}</p>
+          <p className="text-sm text-muted-foreground line-through">
+            {originalPrice}
+          </p>
           {discountPercentage && (
             <p className="text-xs font-semibold text-green-700">
               {discountPercentage}% off

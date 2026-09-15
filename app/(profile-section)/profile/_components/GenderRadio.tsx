@@ -36,7 +36,7 @@ const GenderRadio = ({
         </div>
         {isEditing && (
           <Button
-            className="w-fit bg-blue-500 hover:bg-blue-600"
+            className="w-fit"
             onClick={onSave}
           >
             {isLoading ? (
@@ -63,7 +63,10 @@ const GenderRadio = ({
           />
           <label
             htmlFor="male"
-            className={cn(`text-sm font-medium`, disabled && "text-gray-500")}
+            className={cn(
+              `text-sm font-medium`,
+              disabled && "text-muted-foreground",
+            )}
           >
             Male
           </label>
@@ -80,7 +83,10 @@ const GenderRadio = ({
           />
           <label
             htmlFor="female"
-            className={cn(`text-sm font-medium`, disabled && "text-gray-500")}
+            className={cn(
+              `text-sm font-medium`,
+              disabled && "text-muted-foreground",
+            )}
           >
             Female
           </label>

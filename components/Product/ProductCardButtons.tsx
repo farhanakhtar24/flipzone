@@ -156,14 +156,17 @@ const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
   };
 
   return (
-    <div
-      className="h-full w-full cursor-pointer rounded-full border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75"
+    <button
+      type="button"
+      aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+      aria-pressed={isWishlisted}
+      className="h-full w-full cursor-pointer rounded-full border bg-background p-2 transition-all hover:bg-muted active:scale-75"
       onClick={handleSubmit}
     >
       <FiHeart
-        className={`h-full w-full ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"}`}
+        className={`h-full w-full ${isWishlisted ? "fill-red-500 text-red-500" : "text-muted-foreground"}`}
       />
-    </div>
+    </button>
   );
 };
 

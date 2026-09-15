@@ -43,7 +43,7 @@ const DetailsSection = ({ product }: Props) => {
       <div className="flex w-full flex-wrap text-lg font-semibold">{title}</div>
       <div className="flex w-full flex-wrap items-center gap-2">
         <RatingBox rating={rating} />
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           {reviews.length} reviews
         </div>
       </div>
@@ -53,7 +53,7 @@ const DetailsSection = ({ product }: Props) => {
         </span>
         <span className="flex items-baseline gap-3 text-3xl font-medium">
           {formattedPrice}
-          <span className="text-sm font-medium text-gray-400 line-through">
+          <span className="text-sm font-medium text-muted-foreground line-through">
             {originalPrice}
           </span>
           <span className="text-sm font-medium text-green-700">

@@ -88,8 +88,8 @@ const SpecificationTable = ({ product }: Props) => {
               key={index}
               className="grid grid-cols-12 gap-5 p-5 text-xs font-medium"
             >
-              <div className="col-span-3 text-gray-400">{label}</div>
-              <div className="col-span-9 text-gray-900">{value}</div>
+              <div className="col-span-3 text-muted-foreground">{label}</div>
+              <div className="col-span-9">{value}</div>
             </div>
           )
         );

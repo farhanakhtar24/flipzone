@@ -20,7 +20,7 @@ const CategoryDropdown = () => {
       <DropdownMenuTrigger className="flex items-center gap-1 font-semibold">
         Categories <MdOutlineKeyboardArrowDown />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="absolute -right-14 top-0 w-[400px]">
+      <DropdownMenuContent className="w-[min(400px,90vw)]">
         <div className="flex w-full flex-col">
           <DropdownMenuLabel>Product Categories</DropdownMenuLabel>
           <DropdownMenuSeparator />

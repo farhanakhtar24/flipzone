@@ -50,7 +50,7 @@ const ProductsCard = ({ product }: Props) => {
         <CardHeader className="relative flex h-full w-full flex-col">
           <Link
             href={`/products/${id}`}
-            className="absolute right-5 top-5 z-20 rounded bg-white p-2 text-gray-600 transition-all hover:bg-slate-100"
+            className="absolute right-5 top-5 z-20 rounded bg-background p-2 text-muted-foreground transition-all hover:bg-muted"
           >
             <LuExternalLink className="h-5 w-5" />
           </Link>
@@ -60,15 +60,17 @@ const ProductsCard = ({ product }: Props) => {
           <Image src={thumbnail} alt={title} width={999} height={999} />
         </CardHeader>
         <CardContent className="flex h-full flex-col space-y-2">
-          <p className="flex flex-grow flex-col gap-1 text-lg font-semibold text-black/80">
+          <p className="flex flex-grow flex-col gap-1 text-lg font-semibold">
             {title}
-            {brand && <span className="text-sm text-gray-500">by {brand}</span>}
+            {brand && (
+              <span className="text-sm text-muted-foreground">by {brand}</span>
+            )}
           </p>
           <div className="flex items-baseline gap-3">
             <CardTitle className="text-2xl font-bold">
               {formattedPrice}
             </CardTitle>
-            <p className="text-sm text-gray-500 line-through">
+            <p className="text-sm text-muted-foreground line-through">
               {originalPrice}
             </p>
             {discountPercentage && (

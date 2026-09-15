@@ -22,7 +22,7 @@ const CartSummary = ({ cartData }: Props) => {
     <Card className="flex h-[63vh] w-[30%]">
       <CardContent className="flex h-full w-full flex-col p-0">
         <div className="flex border-b p-6">
-          <p className="text-lg font-semibold text-black/80">PRICE DETAILS</p>
+          <p className="text-lg font-semibold">PRICE DETAILS</p>
         </div>
         <div className="flex h-full flex-col gap-3 p-6">
           <div className="flex justify-between">

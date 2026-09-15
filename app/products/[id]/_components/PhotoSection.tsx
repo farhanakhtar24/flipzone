@@ -33,7 +33,7 @@ const PhotoSection = ({ product }: Props) => {
             <Image
               key={index}
               src={image}
-              alt="product image"
+              alt={`${product.title} thumbnail ${index + 1}`}
               width={256}
               height={256}
               className={clsx(

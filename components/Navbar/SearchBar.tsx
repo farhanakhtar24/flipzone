@@ -1,8 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { useQueryParam, parsers, serializers } from "@/hooks/use-query-params";
+import { useRouter } from "nextjs-toploader/app";
+import { PAGE_ROUTES } from "@/routes";
 
 const SearchBar = () => {
+  const router = useRouter();
   const [searchParam, setSearchParam] = useQueryParam({
     key: "search",
     defaultValue: "",
@@ -13,26 +16,33 @@ const SearchBar = () => {
   const [inputValue, setInputValue] = useState(searchParam);
 
   const handleSearch = () => {
-    if (inputValue.trim()) {
-      setSearchParam(inputValue.toLowerCase());
-    } else {
-      setSearchParam("");
+    const value = inputValue.trim().toLowerCase();
+    setSearchParam(value);
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith(PAGE_ROUTES.PRODUCTS)) {
+      const query = value ? `?search=${encodeURIComponent(value)}` : "";
+      router.push(`${PAGE_ROUTES.PRODUCTS}${query}`);
     }
   };
 
   return (
-    <input
-      type="text"
-      placeholder="Search"
-      className="hidden w-1/3 rounded-lg border px-3 py-2 text-sm md:block"
-      value={inputValue}
-      onChange={(e) => setInputValue(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          handleSearch();
-        }
-      }}
-    />
+    <div className="w-full max-w-xs sm:max-w-sm md:w-1/3 md:max-w-none">
+      <label htmlFor="product-search" className="sr-only">
+        Search products
+      </label>
+      <input
+        id="product-search"
+        type="search"
+        placeholder="Search products"
+        className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSearch();
+          }
+        }}
+      />
+    </div>
   );
 };
 

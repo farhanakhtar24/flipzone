@@ -104,7 +104,8 @@ const QuantitySelectorInputs = ({
   return (
     <div className="flex w-[20%] items-center justify-start gap-2 xl:w-[15%] xl:justify-center">
       <button
-        className="flex aspect-square h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-gray-100"
+        aria-label="Decrease quantity"
+        className="flex aspect-square h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-muted"
         onClick={() => handleQuantityUpdate(-1)}
       >
         <FiMinus />
@@ -112,11 +113,13 @@ const QuantitySelectorInputs = ({
       <input
         type="number"
         value={quantity}
-        className="w-12 rounded border text-center"
+        aria-label="Quantity"
+        className="w-12 rounded border bg-background text-center"
         readOnly
       />
       <button
-        className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Increase quantity"
+        className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
         onClick={() => handleQuantityUpdate(1)}
         disabled={stock === quantity}
       >

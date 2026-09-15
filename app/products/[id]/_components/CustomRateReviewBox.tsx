@@ -127,19 +127,30 @@ const CustomRateReviewBox = ({
             name="rating"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
-                <div className="flex gap-3">
+                <div
+                  className="flex gap-3"
+                  role="radiogroup"
+                  aria-label="Rating"
+                >
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <IoIosStar
+                    <button
                       key={star}
+                      type="button"
+                      role="radio"
+                      aria-checked={field.value === star}
+                      aria-label={`${star} star${star > 1 ? "s" : ""}`}
                       onClick={() => field.onChange(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
-                      className={`h-7 w-7 cursor-pointer ${
-                        (hoverRating || field.value) >= star
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
+                    >
+                      <IoIosStar
+                        className={`h-7 w-7 cursor-pointer ${
+                          (hoverRating || field.value) >= star
+                            ? "text-yellow-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
                 <div className="flex items-center gap-3">

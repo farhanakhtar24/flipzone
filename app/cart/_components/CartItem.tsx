@@ -62,10 +62,10 @@ const CartItem = ({ item }: Props) => {
         <div className="flex w-full flex-col justify-between md:w-[85%]">
           <p className="text-xl font-semibold">{title}</p>
           <div className="flex w-full flex-col gap-2">
-            <p className="text-sm text-gray-600">In Stock: {stock}</p>
+            <p className="text-sm text-muted-foreground">In Stock: {stock}</p>
             <div className="flex items-baseline gap-3">
               <CardTitle className="text-2xl">{formattedPrice}</CardTitle>
-              <p className="text-sm text-gray-500 line-through">
+              <p className="text-sm text-muted-foreground line-through">
                 {originalPrice}
               </p>
               {discountPercentage && (

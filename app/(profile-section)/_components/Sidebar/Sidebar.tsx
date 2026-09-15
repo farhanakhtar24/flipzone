@@ -10,63 +10,33 @@ import { LuGitCompare } from "react-icons/lu";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+const links = [
+  { href: PAGE_ROUTES.PROFILE, label: "Profile", icon: CgProfile },
+  { href: PAGE_ROUTES.WISHLIST, label: "Wishlist", icon: FaRegHeart },
+  { href: PAGE_ROUTES.COMPARE, label: "Compare", icon: LuGitCompare },
+  { href: PAGE_ROUTES.ORDERS, label: "Orders", icon: LuPackage },
+];
+
 const Sidebar = () => {
   const currentRoute = usePathname();
 
   return (
-    <Card className="flex h-fit w-1/5 flex-col divide-y overflow-hidden">
-      <Link href={PAGE_ROUTES.PROFILE}>
-        <CardHeader
-          className={cn(
-            `flex w-full flex-col gap-2 transition-all hover:bg-gray-100`,
-            currentRoute === PAGE_ROUTES.PROFILE && "bg-gray-200",
-          )}
-        >
-          <div className="flex w-full items-center gap-2">
-            <CgProfile className="h-5 w-5" />
-            <div className="font-medium">Profile</div>
-          </div>
-        </CardHeader>
-      </Link>
-      <Link href={PAGE_ROUTES.WISHLIST}>
-        <CardHeader
-          className={cn(
-            `flex w-full flex-col gap-2 transition-all hover:bg-gray-100`,
-            currentRoute === PAGE_ROUTES.WISHLIST && "bg-gray-200",
-          )}
-        >
-          <div className="flex w-full items-center gap-2">
-            <FaRegHeart className="h-5 w-5" />
-            <div className="font-medium">Wishlist</div>
-          </div>
-        </CardHeader>
-      </Link>
-      <Link href={PAGE_ROUTES.COMPARE}>
-        <CardHeader
-          className={cn(
-            `flex w-full flex-col gap-2 transition-all hover:bg-gray-100`,
-            currentRoute === PAGE_ROUTES.COMPARE && "bg-gray-200",
-          )}
-        >
-          <div className="flex w-full items-center gap-2">
-            <LuGitCompare className="h-5 w-5" />
-            <div className="font-medium">Compare</div>
-          </div>
-        </CardHeader>
-      </Link>
-      <Link href={PAGE_ROUTES.ORDERS}>
-        <CardHeader
-          className={cn(
-            `flex w-full flex-col gap-2 transition-all hover:bg-gray-100`,
-            currentRoute === PAGE_ROUTES.ORDERS && "bg-gray-200",
-          )}
-        >
-          <div className="flex w-full items-center gap-2">
-            <LuPackage className="h-5 w-5" />
-            <div className="font-medium">Orders</div>
-          </div>
-        </CardHeader>
-      </Link>
+    <Card className="flex h-fit w-full flex-row overflow-x-auto divide-x overflow-hidden md:w-1/5 md:flex-col md:divide-x-0 md:divide-y">
+      {links.map(({ href, label, icon: Icon }) => (
+        <Link key={href} href={href} className="min-w-fit flex-1 md:flex-none">
+          <CardHeader
+            className={cn(
+              "flex w-full flex-col gap-2 transition-all hover:bg-muted",
+              currentRoute === href && "bg-muted",
+            )}
+          >
+            <div className="flex w-full items-center gap-2">
+              <Icon className="h-5 w-5" />
+              <div className="font-medium">{label}</div>
+            </div>
+          </CardHeader>
+        </Link>
+      ))}
     </Card>
   );
 };

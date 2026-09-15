@@ -23,15 +23,15 @@ const page = async () => {
       {/* Hero Section */}
       <section className="flex flex-col items-center gap-6 py-20 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-          Welcome to <span className="text-blue-600">Flipzone</span>
+          Welcome to <span className="text-primary">Flipzone</span>
         </h1>
-        <p className="max-w-[600px] text-lg text-gray-600">
+        <p className="max-w-[600px] text-lg text-muted-foreground">
           Discover top-rated products across every category. Compare prices,
           read reviews, and shop smarter.
         </p>
         <Link
           href={PAGE_ROUTES.PRODUCTS}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-lg font-medium text-white transition-colors hover:bg-blue-500"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-lg font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Browse Products
           <ArrowRight className="h-5 w-5" />
@@ -49,7 +49,7 @@ const page = async () => {
                 href={`${PAGE_ROUTES.PRODUCTS}?category=${encodeURIComponent(
                   category.name,
                 )}`}
-                className="rounded-full border bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-600"
+                className="rounded-full border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-primary"
               >
                 {category.name}
               </Link>
@@ -66,7 +66,7 @@ const page = async () => {
             <h2 className="text-2xl font-semibold">Featured Products</h2>
             <Link
               href={PAGE_ROUTES.PRODUCTS}
-              className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
               View all
               <ArrowRight className="h-4 w-4" />
@@ -90,7 +90,7 @@ const page = async () => {
                       <h3 className="line-clamp-1 text-base font-semibold">
                         {product.title}
                       </h3>
-                      <p className="mt-1 text-lg font-bold text-blue-600">
+                      <p className="mt-1 text-lg font-bold text-primary">
                         {priceFormatter(product.price)}
                       </p>
                       {product.discountPercentage && (

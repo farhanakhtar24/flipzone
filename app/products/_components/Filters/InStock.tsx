@@ -12,8 +12,15 @@ const InStock = () => {
   });
 
   return (
-    <div>
-      <Switch checked={inStock} onCheckedChange={setInStock} />
+    <div className="flex items-center gap-2">
+      <Switch
+        id="in-stock"
+        checked={inStock}
+        onCheckedChange={setInStock}
+      />
+      <label htmlFor="in-stock" className="text-sm">
+        In stock only
+      </label>
     </div>
   );
 };

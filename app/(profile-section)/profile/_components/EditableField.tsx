@@ -38,7 +38,7 @@ const EditableField = ({
         </div>
         {isEditing && (
           <Button
-            className="w-fit bg-blue-500 hover:bg-blue-600"
+            className="w-fit"
             onClick={() => onSave(value)}
           >
             {isLoading ? (

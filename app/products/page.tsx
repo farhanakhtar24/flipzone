@@ -37,7 +37,9 @@ const page = async ({ searchParams }: Props) => {
   if (!session?.user?.id) {
     return (
       <Wrapper>
-        <div>Product not found</div>
+        <div className="py-20 text-center text-muted-foreground">
+          Please sign in to browse products.
+        </div>
       </Wrapper>
     );
   }
@@ -61,7 +63,7 @@ const page = async ({ searchParams }: Props) => {
   }
 
   return (
-    <section className="flex h-full w-full gap-5 px-5">
+    <section className="flex h-full w-full flex-col gap-5 px-5 md:flex-row">
       <FilterSection />
       <div className="flex w-full flex-col gap-4">
         <TaggedFilters />

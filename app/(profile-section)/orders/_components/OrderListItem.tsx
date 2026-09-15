@@ -22,9 +22,9 @@ const OrderListItem = ({ order }: Props) => {
     items: orderItems,
   } = order;
   return (
-    <div key={id} className="flex flex-col gap-3 border-b border-gray-300 p-5">
+    <div key={id} className="flex flex-col gap-3 border-b p-5">
       <div className="flex flex-col justify-between sm:flex-row">
-        <div className="text-lg font-semibold text-gray-700">
+        <div className="text-lg font-semibold">
           Order ID: #{id}
         </div>
         <div className="flex gap-3">{timeFormatter(createdAt)}</div>
