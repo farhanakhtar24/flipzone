@@ -4,6 +4,7 @@ import React from "react";
 import ProductGrid from "./_components/ProductGrid";
 import { auth } from "@/auth";
 import FilterSection from "./_components/Filters/FilterSection";
+import TaggedFilters from "./_components/Filters/TaggedFilters";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,10 @@ const page = async ({ searchParams }: Props) => {
   return (
     <section className="flex h-full w-full gap-5 px-5">
       <FilterSection />
-      <ProductGrid products={data} />
+      <div className="flex w-full flex-col gap-4">
+        <TaggedFilters />
+        <ProductGrid products={data} />
+      </div>
     </section>
   );
 };

@@ -37,6 +37,10 @@ export const getAllProducts = async (
   const userId = session.user.id;
 
   try {
+    // Parse comma-separated multi-select values
+    const brands = filters?.brand?.split(",").filter(Boolean);
+    const categories = filters?.category?.split(",").filter(Boolean);
+
     // Build the where clause based on filters
     const where: Prisma.ProductWhereInput = {
       ...(filters?.search && {
@@ -57,20 +61,20 @@ export const getAllProducts = async (
       ...(filters?.discountPercentage && {
         discountPercentage: { gte: filters.discountPercentage },
       }),
-      ...(filters?.brand && {
-        brand: { equals: filters.brand },
+      ...(brands?.length && {
+        brand: { in: brands },
       }),
-      ...(filters?.category && {
+      ...(categories?.length && {
         categories: {
           some: {
             category: {
-              name: { equals: filters.category },
+              name: { in: categories },
             },
           },
         },
       }),
-      ...(filters?.inStock && {
-        stock: { gte: filters.inStock === "true" ? 1 : 0 },
+      ...(filters?.inStock === "true" && {
+        stock: { gte: 1 },
       }),
     };
 

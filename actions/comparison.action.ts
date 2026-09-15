@@ -8,9 +8,55 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth-guard";
 import { ComparisonItemSchema } from "@/schemas/comparison";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const MAX_COMPARISON_ITEMS = 4;
+
+const productWithCategories =
+  Prisma.validator<Prisma.ProductDefaultArgs>()({
+    include: { categories: { include: { category: true } } },
+  });
+
+export type ProductWithCategories = Prisma.ProductGetPayload<
+  typeof productWithCategories
+>;
+
+export const getComparisonProducts = async (): Promise<
+  ApiResponse<ProductWithCategories[]>
+> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  try {
+    const comparison = await db.comparison.findUnique({
+      where: { userId: session.user.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                categories: { include: { category: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const products = comparison?.items.map((item) => item.product) ?? [];
+
+    return {
+      statusCode: 200,
+      success: true,
+      message: "Comparison products fetched.",
+      data: products,
+    };
+  } catch (error) {
+    console.error("Error fetching comparison products:", error);
+    return serverErrorResponse("Failed to load comparison. Please try again.");
+  }
+};
 
 export const addProductToComparison = async (values: {
   productId: string;

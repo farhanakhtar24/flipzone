@@ -1,11 +1,14 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 import { Accordion } from "@/components/ui/accordion";
-import FillterAccordianItem from "./FillterAccordianItem";
+import FilterAccordionItem from "./FilterAccordionItem";
 import PriceSlider from "./PriceSlider";
 import SortBy from "./SortBy";
 import InStock from "./InStock";
-// import TaggedFilters from "./TaggedFilters";
+import BrandFilter from "./BrandFilter";
+import CategoryFilter from "./CategoryFilter";
+import RatingFilter from "./RatingFilter";
+import DiscountFilter from "./DiscountFilter";
 
 const FilterSection = () => {
   return (
@@ -14,15 +17,27 @@ const FilterSection = () => {
         <CardTitle>Filters</CardTitle>
       </CardHeader>
       <Accordion type="multiple" className="w-full divide-y">
-        <FillterAccordianItem title="Price">
-          <PriceSlider />
-        </FillterAccordianItem>
-        <FillterAccordianItem title="Sort-By">
+        <FilterAccordionItem title="Sort By">
           <SortBy />
-        </FillterAccordianItem>
-        <FillterAccordianItem title="In-Stock">
+        </FilterAccordionItem>
+        <FilterAccordionItem title="Category">
+          <CategoryFilter />
+        </FilterAccordionItem>
+        <FilterAccordionItem title="Brand">
+          <BrandFilter />
+        </FilterAccordionItem>
+        <FilterAccordionItem title="Price">
+          <PriceSlider />
+        </FilterAccordionItem>
+        <FilterAccordionItem title="Rating">
+          <RatingFilter />
+        </FilterAccordionItem>
+        <FilterAccordionItem title="Discount">
+          <DiscountFilter />
+        </FilterAccordionItem>
+        <FilterAccordionItem title="In Stock">
           <InStock />
-        </FillterAccordianItem>
+        </FilterAccordionItem>
       </Accordion>
     </Card>
   );

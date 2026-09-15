@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-const FillterAccordianItem = ({ children: content, title }: Props) => {
+const FilterAccordionItem = ({ children: content, title }: Props) => {
   return (
     <AccordionItem value={title} className="space-y-4 border-0 p-6">
       <AccordionTrigger className="p-0 hover:no-underline">
@@ -21,4 +21,4 @@ const FillterAccordianItem = ({ children: content, title }: Props) => {
   );
 };
 
-export default FillterAccordianItem;
+export default FilterAccordionItem;
