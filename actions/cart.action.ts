@@ -78,8 +78,7 @@ export const getUserCart = async (): Promise<ApiResponse<IcartSummary>> => {
   }
 };
 
-export const updateCartItemQuantity = async (values: {
-  cartItemId: string;
+export const updateCartItemQuantity = async (values: {  cartItemId: string;
   quantityChange: number;
 }): Promise<ApiResponse<null>> => {
   const session = await requireUser();
@@ -190,107 +189,6 @@ export const updateCartItemQuantity = async (values: {
     console.error("Error updating cart item quantity:", error);
     return serverErrorResponse(
       "Failed to update cart item quantity. Please try again later.",
-    );
-  }
-};
-
-export const placeOrderFromCart = async (): Promise<ApiResponse<null>> => {
-  const session = await requireUser();
-  if (!session) return unauthorizedResponse();
-
-  const userId = session.user.id;
-
-  try {
-    const result = await db.$transaction(async (prisma) => {
-      const cart = await prisma.cart.findUnique({
-        where: {
-          userId,
-        },
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      });
-
-      if (!cart || cart.items.length === 0) {
-        return {
-          statusCode: 404,
-          success: false,
-          message: "Cart is empty or not found.",
-        };
-      }
-
-      for (const item of cart.items) {
-        if (item.quantity > item.product.stock) {
-          return {
-            statusCode: 400,
-            success: false,
-            message: `Insufficient stock for ${item.product.title}. Only ${item.product.stock} left.`,
-          };
-        }
-      }
-
-      await prisma.order.create({
-        data: {
-          userId,
-          total: cart.items.reduce(
-            (total, item) => total + item.product.price * item.quantity,
-            0,
-          ),
-          status: "PLACED",
-          items: {
-            create: cart.items.map((cartItem) => ({
-              quantity: cartItem.quantity,
-              product: {
-                connect: {
-                  id: cartItem.productId,
-                },
-              },
-            })),
-          },
-        },
-      });
-
-      for (const item of cart.items) {
-        await prisma.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
-      }
-
-      await prisma.cartItem.deleteMany({
-        where: {
-          cartId: cart.id,
-        },
-      });
-
-      await prisma.cart.delete({
-        where: {
-          id: cart.id,
-        },
-      });
-
-      return {
-        statusCode: 200,
-        success: true,
-        message: "Order placed successfully, and cart cleared.",
-      };
-    });
-
-    revalidatePath("/", "layout");
-
-    return result;
-  } catch (error) {
-    console.error("Error placing order:", error);
-    return serverErrorResponse(
-      "Failed to place order. Please try again later.",
     );
   }
 };

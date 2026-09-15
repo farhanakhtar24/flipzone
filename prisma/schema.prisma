@@ -10,6 +10,10 @@ datasource db {
 enum OrderStatus {
   PENDING
   PLACED
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 enum UserRole {
@@ -42,6 +46,7 @@ model User {
   wishlist   Wishlist? // User can have one wishlist
   comparison Comparison? // User can have one comparison
   reviews    Review[] // User can author many reviews
+  addresses  Address[]
 }
 
 model Account {
@@ -191,9 +196,30 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
 }
 
+model Address {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName   String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("US")
+  phone      String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model OrderedItem {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  quantity Int
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  quantity   Int
+  unitPrice  Int     @default(0)
+  title      String  @default("")
+  thumbnail  String?
 
   // Relationships
   orderId   String  @db.ObjectId
@@ -203,16 +229,25 @@ model OrderedItem {
 }
 
 model Order {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  total     Int // Stored in cents
-  status    OrderStatus @default(PENDING)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id                    String      @id @default(auto()) @map("_id") @db.ObjectId
+  total                 Int
+  status                OrderStatus @default(PENDING)
+  stripeSessionId       String?     @unique
+  stripePaymentIntentId String?
+  shippingName          String?
+  shippingLine1         String?
+  shippingLine2         String?
+  shippingCity          String?
+  shippingState         String?
+  shippingPostalCode    String?
+  shippingCountry       String?
+  shippingPhone         String?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
-  // Relationships
   userId String        @db.ObjectId
   user   User          @relation(fields: [userId], references: [id])
-  items  OrderedItem[] // Changed to 'items' for consistency
+  items  OrderedItem[]
 }
 
 model ProductCategory {

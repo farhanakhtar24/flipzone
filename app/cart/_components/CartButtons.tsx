@@ -1,10 +1,8 @@
 "use client";
-import { placeOrderFromCart } from "@/actions/cart.action";
+import { createCheckoutSession } from "@/actions/checkout.action";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
-import { PAGE_ROUTES } from "@/routes";
-import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { AiFillThunderbolt } from "react-icons/ai";
 import { FiMinus } from "react-icons/fi";
@@ -21,48 +19,51 @@ type QuantitySelectorInputsProps = {
   handleQuantityUpdate: (quantity: number) => void;
 };
 
-const PlaceOrderButton = () => {
+type CheckoutButtonProps = {
+  addressId?: string;
+};
+
+const CheckoutButton = ({ addressId }: CheckoutButtonProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handlePlaceOrder = async () => {
-    const { message, error } = await placeOrderFromCart();
-
-    if (error) {
+  const handleCheckout = async () => {
+    if (!addressId) {
       toast({
-        title: message,
-        description: error,
+        title: "Choose a delivery address first.",
         variant: "destructive",
       });
-    } else if (message) {
-      toast({
-        title: message,
-        variant: "success",
-      });
-
-      router.push(PAGE_ROUTES.ORDERS);
+      return;
     }
+
+    setLoading(true);
+    const { message, error, data } = await createCheckoutSession({
+      addressId,
+    });
+
+    if (error || !data?.checkoutUrl) {
+      toast({ title: message, description: error, variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    window.location.href = data.checkoutUrl;
   };
 
   return (
     <Button
       disabled={loading}
-      onClick={async () => {
-        setLoading(true);
-        await handlePlaceOrder();
-        setLoading(false);
-      }}
-      className="flex h-12 w-full items-center justify-center bg-orange-500 text-lg hover:bg-orange-400"
+      onClick={handleCheckout}
+      className="flex h-12 w-full items-center justify-center text-lg"
     >
       {loading ? (
         <div className="h-5 w-5">
-          <Spinner className="text-white" />
+          <Spinner className="text-primary-foreground" />
         </div>
       ) : (
         <>
           <AiFillThunderbolt className="mr-1 h-6 w-6" />
-          Place Order
+          Checkout
         </>
       )}
     </Button>
@@ -129,4 +130,4 @@ const QuantitySelectorInputs = ({
   );
 };
 
-export { PlaceOrderButton, RemoveItemButton, QuantitySelectorInputs };
+export { CheckoutButton, RemoveItemButton, QuantitySelectorInputs };

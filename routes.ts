@@ -7,6 +7,7 @@ export const PAGE_ROUTES = {
   PROFILE: "/profile",
   WISHLIST: "/wishlist",
   COMPARE: "/compare",
+  CHECKOUT_SUCCESS: "/checkout/success",
 };
 
 export const API_ROUTES = {};

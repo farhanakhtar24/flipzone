@@ -10,6 +10,7 @@ const protectedRoutes = [
   PAGE_ROUTES.PROFILE,
   PAGE_ROUTES.WISHLIST,
   PAGE_ROUTES.COMPARE,
+  "/checkout",
 ];
 
 export default async function middleware(request: NextRequest) {

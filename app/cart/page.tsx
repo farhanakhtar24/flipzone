@@ -1,4 +1,5 @@
 import React from "react";
+import { getUserAddresses } from "@/actions/address.action";
 import { getUserCart } from "@/actions/cart.action";
 import { auth } from "@/auth";
 import Wrapper from "@/components/Wrapper/Wrapper";
@@ -19,7 +20,8 @@ const page = async () => {
     );
   }
 
-  const { data: cartData, message, error } = await getUserCart();
+  const [{ data: cartData, message, error }, { data: addresses }] =
+    await Promise.all([getUserCart(), getUserAddresses()]);
 
   if (error) {
     return (
@@ -32,15 +34,15 @@ const page = async () => {
   return (
     <Wrapper>
       <div className="flex h-full w-full flex-col gap-5">
-        <Card className="flex h-full w-full">
+        <Card className="flex w-full">
           <CardHeader>
             <CardTitle className="text-2xl">Cart</CardTitle>
           </CardHeader>
         </Card>
         {cartData ? (
-          <div className="flex h-full w-full gap-5">
+          <div className="flex w-full flex-col gap-5 lg:flex-row">
             <CartItemsSection cartData={cartData} />
-            <CartSummary cartData={cartData} />
+            <CartSummary cartData={cartData} addresses={addresses ?? []} />
           </div>
         ) : (
           <Card>
