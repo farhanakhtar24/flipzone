@@ -4,6 +4,7 @@ import SessionContext from "@/context/SessionContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar/Navbar";
+import Footer from "@/components/Footer/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 
@@ -38,12 +39,9 @@ export default function RootLayout({
           >
             <NextTopLoader />
             <Navbar />
-            <main className="min-h-[88vh] overflow-y-auto bg-background">
-              <div className="flex h-full w-full items-center justify-center py-10">
-                {children}
-              </div>
-              <Toaster />
-            </main>
+            <main className="min-h-[80vh] bg-background">{children}</main>
+            <Footer />
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
