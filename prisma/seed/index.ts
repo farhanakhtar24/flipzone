@@ -94,9 +94,14 @@ async function seed() {
       rating = total / reviews.length;
     }
 
+    // Product.price is Int dollars — dummyjson floats (e.g. 0.49) would
+    // round to $0; floor at 1 so every product is purchasable.
+    const priceInt = Math.max(1, Math.round(Number(productData.price) || 1));
+
     const product = await db.product.create({
       data: {
         ...(productData as Record<string, unknown>),
+        price: priceInt,
         rating: parseFloat(rating.toFixed(2)),
       } as never, // dummyjson fields match the Product model loosely
     });
