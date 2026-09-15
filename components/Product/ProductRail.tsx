@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ProductsCard from "@/components/Product/ProductsCard";
 import { IproductWithCartStatus } from "@/interfaces/actionInterface";
-import { PAGE_ROUTES } from "@/routes";
 
 type Props = {
   title: string;
