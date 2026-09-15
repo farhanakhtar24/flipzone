@@ -40,7 +40,11 @@ const ProductsCard = ({ product }: Props) => {
   return (
     <Card className="group hover:ring-primary/25 relative flex h-full w-full flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg hover:ring-1">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-secondary">
-        <Link href={`/products/${id}`} aria-label={title}>
+        <Link
+          href={`/products/${id}`}
+          aria-label={title}
+          className="absolute inset-0"
+        >
           <Image
             src={thumbnail}
             alt={title}
