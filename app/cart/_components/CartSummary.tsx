@@ -10,7 +10,7 @@ type Props = {
 };
 
 const CartSummary = ({ cartData }: Props) => {
-  const { finalPrice, totalDiscount, totalMRP, totalQuantity, cart } = cartData;
+  const { finalPrice, totalDiscount, totalMRP, totalQuantity } = cartData;
 
   const formattedPrices = {
     originaltotal: priceFormatter(totalMRP),
@@ -50,7 +50,7 @@ const CartSummary = ({ cartData }: Props) => {
           </div>
         </div>
         <div className="flex w-full items-center justify-center p-6">
-          <PlaceOrderButton cartId={cart.id} />
+          <PlaceOrderButton />
         </div>
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 import { getWishlistByUserId } from "@/actions/wishlist.action";
 import { auth } from "@/auth";
 import React from "react";
-import WislistItems from "./_components/WislistItems";
+import WishlistItems from "./_components/WishlistItems";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ const page = async () => {
     return <div>User not found</div>;
   }
 
-  const { data, error, message } = await getWishlistByUserId(session.user.id);
+  const { data, error, message } = await getWishlistByUserId();
 
   if (error) {
     return (
@@ -30,13 +30,7 @@ const page = async () => {
     );
   }
 
-  if (message) {
-    console.log("message :", message);
-  }
-
-  console.log({ data });
-
-  return <WislistItems wishlist={data} />;
+  return <WishlistItems wishlist={data} />;
 };
 
 export default page;

@@ -4,11 +4,22 @@ import {
   ApiResponse,
   IproductWithCartStatus,
 } from "@/interfaces/actionInterface";
+import { requireUser, unauthorizedResponse } from "@/lib/auth-guard";
+import { serverErrorResponse } from "@/lib/auth-guard";
+import { AddToCartSchema } from "@/schemas/cart";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+// Sort fields that are safe to expose to the client
+const SORTABLE_FIELDS: Record<string, keyof Prisma.ProductOrderByWithRelationInput> = {
+  price: "price",
+  rating: "rating",
+  title: "title",
+  createdAt: "createdAt",
+  discountPercentage: "discountPercentage",
+};
+
 export const getAllProducts = async (
-  userId: string,
   filters?: {
     search?: string;
     priceRange?: [number, number];
@@ -20,6 +31,11 @@ export const getAllProducts = async (
     inStock?: string;
   },
 ): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
   try {
     // Build the where clause based on filters
     const where: Prisma.ProductWhereInput = {
@@ -58,16 +74,20 @@ export const getAllProducts = async (
       }),
     };
 
-    // Inside getAllProducts function, replace the orderBy construction with:
-    const [sortField, sortDirection] = (filters?.sortBy?.split(":") || [
+    // Allowlist-based sorting to prevent arbitrary field injection
+    const [rawField, rawDirection] = (filters?.sortBy?.split(":") || [
       "rating",
       "desc",
     ]) as [string, "asc" | "desc"];
+
+    const sortField = SORTABLE_FIELDS[rawField] ?? "rating";
+    const sortDirection = rawDirection === "asc" ? "asc" : "desc";
+
     const orderBy = {
       [sortField]: sortDirection,
     };
 
-    // Fetch products with cart item and wishlist item info for checking user status
+    // Fetch products with cart/wishlist info for checking user status
     const products = await db.product.findMany({
       where,
       orderBy,
@@ -95,7 +115,6 @@ export const getAllProducts = async (
       },
     });
 
-    // Map the products to include the isInCart and isWishlisted status
     const productsWithCartStatus = products.map(
       ({ cartItems, wishlistItems, ...product }) => ({
         ...product,
@@ -111,40 +130,59 @@ export const getAllProducts = async (
       data: productsWithCartStatus,
     };
   } catch (error) {
-    console.error(
-      "Error fetching products with cart and wishlist status:",
-      error,
-    );
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to fetch products. Please try again later.",
-      error: errorMessage,
-    };
+    console.error("Error fetching products:", error);
+    return serverErrorResponse("Failed to fetch products. Please try again later.");
   }
 };
 
-export async function addToCart({
-  userId,
-  productId,
-}: {
-  userId: string;
+export async function addToCart(values: {
   productId: string;
 }): Promise<ApiResponse<null>> {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  const validatedFields = AddToCartSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      statusCode: 400,
+      success: false,
+      message: "Invalid product data.",
+    };
+  }
+
+  const { productId } = validatedFields.data;
+
   try {
-    // Start a transaction to ensure data consistency
-    await db.$transaction(async (prisma) => {
-      // Check if the user already has a cart
-      let cart = await prisma.cart.findUnique({
-        where: {
-          userId,
-        },
+    const result = await db.$transaction(async (prisma) => {
+      // Verify the product exists and is in stock before touching the cart
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { id: true, stock: true },
       });
 
-      // If no cart exists, create one
+      if (!product) {
+        return {
+          statusCode: 404,
+          success: false,
+          message: "Product not found.",
+        };
+      }
+
+      let cart = await prisma.cart.findUnique({
+        where: { userId },
+      });
+
       if (!cart) {
+        if (product.stock < 1) {
+          return {
+            statusCode: 400,
+            success: false,
+            message: "This product is out of stock.",
+          };
+        }
+
         cart = await prisma.cart.create({
           data: {
             userId,
@@ -157,7 +195,6 @@ export async function addToCart({
           },
         });
       } else {
-        // If the cart exists, check if the product is already in the cart
         const existingCartItem = await prisma.cartItem.findFirst({
           where: {
             cartId: cart.id,
@@ -166,7 +203,14 @@ export async function addToCart({
         });
 
         if (existingCartItem) {
-          // If the product is already in the cart, just update the quantity
+          if (existingCartItem.quantity + 1 > product.stock) {
+            return {
+              statusCode: 400,
+              success: false,
+              message: `Only ${product.stock} items left in stock.`,
+            };
+          }
+
           await prisma.cartItem.update({
             where: {
               id: existingCartItem.id,
@@ -176,7 +220,14 @@ export async function addToCart({
             },
           });
         } else {
-          // If the product is not in the cart, create a new cart item
+          if (product.stock < 1) {
+            return {
+              statusCode: 400,
+              success: false,
+              message: "This product is out of stock.",
+            };
+          }
+
           await prisma.cartItem.create({
             data: {
               cartId: cart.id,
@@ -186,7 +237,11 @@ export async function addToCart({
           });
         }
       }
+
+      return null;
     });
+
+    if (result) return result;
 
     revalidatePath("/", "layout");
     return {
@@ -196,24 +251,21 @@ export async function addToCart({
     };
   } catch (error) {
     console.error("Error adding product to cart:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to add product to cart. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to add product to cart. Please try again later.",
+    );
   }
 }
 
 export const getProductById = async (
   productId: string,
-  userId: string,
 ): Promise<ApiResponse<IproductWithCartStatus>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
   try {
-    // Fetch the product details
     const product = await db.product.findUnique({
       where: {
         id: productId,
@@ -225,6 +277,7 @@ export const getProductById = async (
               userId,
             },
           },
+          select: { id: true },
         },
         wishlistItems: {
           where: {
@@ -232,6 +285,7 @@ export const getProductById = async (
               userId,
             },
           },
+          select: { id: true },
         },
         comparisonItems: {
           where: {
@@ -239,6 +293,7 @@ export const getProductById = async (
               userId,
             },
           },
+          select: { id: true },
         },
         orderItems: {
           where: {
@@ -246,12 +301,14 @@ export const getProductById = async (
               userId,
             },
           },
+          select: { id: true },
         },
-        reviews: true,
+        reviews: {
+          orderBy: { date: "desc" },
+        },
       },
     });
 
-    // If product doesn't exist, return a not found response
     if (!product) {
       return {
         statusCode: 404,
@@ -260,22 +317,17 @@ export const getProductById = async (
       };
     }
 
-    // Determine if the product is in the user's cart, wishlist, and comparison list
-    const isInCart = product.cartItems.length > 0;
-    const isWishlisted = product.wishlistItems.length > 0;
-    const isCompared = product.comparisonItems.length > 0;
-    const isOrdered = product.orderItems.length > 0;
+    const { cartItems, wishlistItems, comparisonItems, orderItems, ...rest } =
+      product;
 
-    // Create a new product object that includes isInCart, isWishlisted, and isCompared
     const productWithCartStatus = {
-      ...product,
-      isInCart,
-      isWishlisted,
-      isCompared,
-      isOrdered,
+      ...rest,
+      isInCart: cartItems.length > 0,
+      isWishlisted: wishlistItems.length > 0,
+      isCompared: comparisonItems.length > 0,
+      isOrdered: orderItems.length > 0,
     };
 
-    // Return the product with the isInCart, isWishlisted, and isCompared properties included
     return {
       statusCode: 200,
       success: true,
@@ -284,13 +336,8 @@ export const getProductById = async (
     };
   } catch (error) {
     console.error("Error fetching product:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to fetch product. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to fetch product. Please try again later.",
+    );
   }
 };

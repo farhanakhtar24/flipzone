@@ -18,8 +18,6 @@ const page = async () => {
     return <div>User not found</div>;
   }
 
-  console.log({ user });
-
   return (
     <div className="flex h-fit flex-col p-7">
       <ProfileSettings user={user} />

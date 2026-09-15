@@ -10,28 +10,24 @@ import { AiFillThunderbolt } from "react-icons/ai";
 import { FiMinus } from "react-icons/fi";
 import { GoPlus } from "react-icons/go";
 
-type PlaceOrderButtonProps = {
-  cartId: string;
-};
-
 type RemoveItemButtonProps = {
   quantity: number;
   handleQuantityUpdate: (quantity: number) => Promise<void>;
 };
 
-type QunatitySelectorInputsProps = {
+type QuantitySelectorInputsProps = {
   stock: number;
   quantity: number;
   handleQuantityUpdate: (quantity: number) => void;
 };
 
-const PlaceOrderButton = ({ cartId }: PlaceOrderButtonProps) => {
+const PlaceOrderButton = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handlePlaceOrder = async () => {
-    const { message, error } = await placeOrderFromCart(cartId);
+    const { message, error } = await placeOrderFromCart();
 
     if (error) {
       toast({
@@ -57,7 +53,7 @@ const PlaceOrderButton = ({ cartId }: PlaceOrderButtonProps) => {
         await handlePlaceOrder();
         setLoading(false);
       }}
-      className="justify-centers flex h-12 w-full items-center bg-orange-500 text-lg hover:bg-orange-400"
+      className="flex h-12 w-full items-center justify-center bg-orange-500 text-lg hover:bg-orange-400"
     >
       {loading ? (
         <div className="h-5 w-5">
@@ -81,7 +77,7 @@ const RemoveItemButton = ({
 
   return (
     <Button
-      className="justify-centers flex min-w-28 items-center bg-red-700 hover:bg-red-500"
+      className="flex min-w-28 items-center justify-center bg-red-700 hover:bg-red-500"
       onClick={async () => {
         setLoading(true);
         await handleQuantityUpdate(-quantity);
@@ -100,11 +96,11 @@ const RemoveItemButton = ({
   );
 };
 
-const QunatitySelectorInputs = ({
+const QuantitySelectorInputs = ({
   quantity,
   handleQuantityUpdate,
   stock,
-}: QunatitySelectorInputsProps) => {
+}: QuantitySelectorInputsProps) => {
   return (
     <div className="flex w-[20%] items-center justify-start gap-2 xl:w-[15%] xl:justify-center">
       <button
@@ -130,4 +126,4 @@ const QunatitySelectorInputs = ({
   );
 };
 
-export { PlaceOrderButton, RemoveItemButton, QunatitySelectorInputs };
+export { PlaceOrderButton, RemoveItemButton, QuantitySelectorInputs };

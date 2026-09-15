@@ -37,7 +37,7 @@ export default {
           throw new Error("User not found");
         }
 
-        const isMatch = bcrypt.compareSync(
+        const isMatch = await bcrypt.compare(
           credentials.password as string,
           user?.password as string,
         );

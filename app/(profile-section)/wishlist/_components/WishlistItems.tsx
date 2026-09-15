@@ -7,13 +7,13 @@ type WishlistItemsProps = {
 };
 
 const WishlistItems = ({ wishlist }: WishlistItemsProps) => {
-  const { items, wishlistId } = wishlist;
+  const { items } = wishlist;
 
   return (
     <div className="flex h-fit w-full flex-col items-center justify-center">
       <div className="grid h-full w-full grid-cols-4 gap-5 p-5">
         {items.map((item) => (
-          <WishlistItemCard key={item.id} item={item} wishlistId={wishlistId} />
+          <WishlistItemCard key={item.id} item={item} />
         ))}
       </div>
     </div>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import GenderRadio from "./GenderRadio";
 import { updateUser } from "@/actions/user.action";
 import { useToast } from "@/hooks/use-toast";
-import EditableField from "./EditbaleField";
+import EditableField from "./EditableField";
 
 type Props = {
   user: User;
@@ -12,7 +12,7 @@ type Props = {
 
 const ProfileSettings = ({ user }: Props) => {
   const { toast } = useToast();
-  const { name, email, phone, gender, id } = user;
+  const { name, email, phone, gender } = user;
   const [nameInput, setNameInput] = useState(name);
   const [emailInput, setEmailInput] = useState(email);
   const [phoneInput, setPhoneInput] = useState(phone);
@@ -29,22 +29,14 @@ const ProfileSettings = ({ user }: Props) => {
     gender: false,
   });
 
-  const handleSave = async (field: string) => {
-    console.log(`${field} input:`, {
-      name: nameInput,
-      email: emailInput,
-      phone: phoneInput ?? undefined,
-      gender: genderInput,
-    });
-
+  const handleSave = async () => {
     setIsLoading(true);
 
     const { message, error } = await updateUser({
       name: nameInput ?? undefined,
       email: emailInput ?? undefined,
       phone: phoneInput ?? undefined,
-      gender: genderInput ?? undefined,
-      userId: id,
+      gender: genderInput,
     });
 
     if (error) {
@@ -79,7 +71,7 @@ const ProfileSettings = ({ user }: Props) => {
         onEditToggle={() =>
           setIsEditing((prev) => ({ ...prev, name: !prev.name }))
         }
-        onSave={() => handleSave("name")}
+        onSave={handleSave}
         onChange={setNameInput}
         isLoading={isLoading}
       />
@@ -90,7 +82,7 @@ const ProfileSettings = ({ user }: Props) => {
         onEditToggle={() =>
           setIsEditing((prev) => ({ ...prev, email: !prev.email }))
         }
-        onSave={() => handleSave("email")}
+        onSave={handleSave}
         onChange={setEmailInput}
         isLoading={isLoading}
       />
@@ -101,7 +93,7 @@ const ProfileSettings = ({ user }: Props) => {
         onEditToggle={() =>
           setIsEditing((prev) => ({ ...prev, phone: !prev.phone }))
         }
-        onSave={() => handleSave("phone")}
+        onSave={handleSave}
         onChange={setPhoneInput}
         isLoading={isLoading}
       />
@@ -113,7 +105,7 @@ const ProfileSettings = ({ user }: Props) => {
         onEditToggle={() =>
           setIsEditing((prev) => ({ ...prev, gender: !prev.gender }))
         }
-        onSave={() => handleSave("gender")}
+        onSave={handleSave}
         isLoading={isLoading}
       />
     </div>

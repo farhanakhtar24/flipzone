@@ -41,6 +41,7 @@ model User {
   accounts   Account[] // User can have many accounts
   wishlist   Wishlist? // User can have one wishlist
   comparison Comparison? // User can have one comparison
+  reviews    Review[] // User can author many reviews
 }
 
 model Account {
@@ -110,8 +111,10 @@ model Review {
   reviewerEmail String
 
   // Relationships
-  productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String  @db.ObjectId
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewerId String? @db.ObjectId
+  reviewer   User?   @relation(fields: [reviewerId], references: [id], onDelete: SetNull)
 }
 
 model Wishlist {

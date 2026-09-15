@@ -2,23 +2,32 @@
 
 import { db } from "@/db";
 import { ApiResponse, IOrderSummary } from "@/interfaces/actionInterface";
+import {
+  requireUser,
+  serverErrorResponse,
+  unauthorizedResponse,
+} from "@/lib/auth-guard";
 
-export const getUserOrders = async (
-  userId: string,
-): Promise<ApiResponse<IOrderSummary[]>> => {
+export const getUserOrders = async (): Promise<
+  ApiResponse<IOrderSummary[]>
+> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
   try {
-    // Fetch all orders for the user, ordered by ID
     const orders = await db.order.findMany({
       where: {
         userId,
       },
       orderBy: {
-        id: "desc",
-      }, // Change to "desc" for reverse order
+        createdAt: "desc",
+      },
       include: {
         items: {
           include: {
-            product: true, // Include product details for each order item
+            product: true,
           },
         },
       },
@@ -28,11 +37,10 @@ export const getUserOrders = async (
       return {
         statusCode: 404,
         success: false,
-        message: "No orders found for the given user.",
+        message: "No orders found.",
       };
     }
 
-    // Create a summary array of orders to return in the response
     const orderSummaries: IOrderSummary[] = orders.map((order) => ({
       orderId: order.id,
       status: order.status,
@@ -49,30 +57,29 @@ export const getUserOrders = async (
     };
   } catch (error) {
     console.error("Error fetching orders:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to fetch orders. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to fetch orders. Please try again later.",
+    );
   }
 };
 
 export const getOrderById = async (
   orderId: string,
 ): Promise<ApiResponse<IOrderSummary>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
   try {
-    // Fetch the order by its ID
-    const order = await db.order.findUnique({
+    // Scope the lookup to the requesting user's orders only
+    const order = await db.order.findFirst({
       where: {
         id: orderId,
+        userId: session.user.id,
       },
       include: {
         items: {
           include: {
-            product: true, // Include product details for each order item
+            product: true,
           },
         },
       },
@@ -82,11 +89,10 @@ export const getOrderById = async (
       return {
         statusCode: 404,
         success: false,
-        message: "Order not found for the given ID.",
+        message: "Order not found.",
       };
     }
 
-    // Create an order summary to return in the response
     const orderSummary: IOrderSummary = {
       orderId: order.id,
       status: order.status,
@@ -103,13 +109,8 @@ export const getOrderById = async (
     };
   } catch (error) {
     console.error("Error fetching order:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to fetch the order. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to fetch the order. Please try again later.",
+    );
   }
 };

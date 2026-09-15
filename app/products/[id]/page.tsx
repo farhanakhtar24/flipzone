@@ -28,7 +28,7 @@ const page = async ({ params }: Props) => {
     error,
     data: product,
     message,
-  } = await getProductById(id, session.user.id);
+  } = await getProductById(id);
 
   if (error) {
     return (
@@ -45,12 +45,6 @@ const page = async ({ params }: Props) => {
       </Wrapper>
     );
   }
-
-  if (message) {
-    console.log("message :", message);
-  }
-
-  console.log({ product });
 
   return (
     <Wrapper>

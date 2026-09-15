@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { IcartItemWithProduct } from "@/interfaces/actionInterface";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import Image from "next/image";
-import { QunatitySelectorInputs, RemoveItemButton } from "./CartButtons";
+import { QuantitySelectorInputs, RemoveItemButton } from "./CartButtons";
 
 type Props = {
   item: IcartItemWithProduct;
@@ -30,10 +30,10 @@ const CartItem = ({ item }: Props) => {
   const originalPrice = originalPriceGetter(price, discountPercentage);
 
   const handleQuantityUpdate = async (quantity: number) => {
-    const { message, error } = await updateCartItemQuantity(
+    const { message, error } = await updateCartItemQuantity({
       cartItemId,
-      quantity,
-    );
+      quantityChange: quantity,
+    });
 
     if (error) {
       toast({
@@ -79,7 +79,7 @@ const CartItem = ({ item }: Props) => {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <QunatitySelectorInputs
+        <QuantitySelectorInputs
           quantity={quantity}
           handleQuantityUpdate={handleQuantityUpdate}
           stock={stock}

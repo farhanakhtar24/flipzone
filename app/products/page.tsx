@@ -31,8 +31,6 @@ const page = async ({ searchParams }: Props) => {
     inStock: searchParams.inStock as string | undefined,
   };
 
-  console.log("filters :", filters);
-
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -43,10 +41,7 @@ const page = async ({ searchParams }: Props) => {
     );
   }
 
-  const { data, error, message } = await getAllProducts(
-    session.user.id,
-    filters,
-  );
+  const { data, error, message } = await getAllProducts(filters);
 
   if (error) {
     return (
@@ -62,10 +57,6 @@ const page = async ({ searchParams }: Props) => {
         <div>{message}</div>
       </Wrapper>
     );
-  }
-
-  if (message) {
-    console.log("message :", message);
   }
 
   return (

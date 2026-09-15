@@ -5,11 +5,11 @@ export type PathSegment = {
   value: string;
 };
 
-export function saltAndHashPassword(password: string) {
-  const saltRounds = 10; // Adjust the cost factor according to your security requirements
-  const salt = bcrypt.genSaltSync(saltRounds); // Synchronously generate a salt
-  const hash = bcrypt.hashSync(password, salt); // Synchronously hash the password
-  return hash; // Return the hash directly as a string
+export async function saltAndHashPassword(password: string) {
+  const saltRounds = 10;
+  const salt = await bcrypt.genSalt(saltRounds);
+  const hash = await bcrypt.hash(password, salt);
+  return hash;
 }
 
 export function priceFormatter(price: number) {

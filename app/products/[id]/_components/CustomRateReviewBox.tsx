@@ -14,8 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { ReviewSchema } from "@/schemas/product"; // Import your Zod schema
-import { useSession } from "next-auth/react";
+import { ReviewSchema } from "@/schemas/product";
 import FormError from "@/components/ui/form-error";
 import { useToast } from "@/hooks/use-toast";
 import { addReview, editReview } from "@/actions/reviews.action";
@@ -38,20 +37,16 @@ const CustomRateReviewBox = ({
   reviewId,
   setIsEditing,
 }: Props) => {
-  const { data: session } = useSession();
   const [hoverRating, setHoverRating] = useState(0);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Set up react-hook-form with Zod schema validation
   const form = useForm<z.infer<typeof ReviewSchema>>({
     resolver: zodResolver(ReviewSchema),
     defaultValues: {
       rating: rating ? rating : 0,
       comment: comment ? comment : "",
-      reviewerEmail: session?.user?.email || "",
-      reviewerName: session?.user?.name || "",
       productId: productId,
       reviewId: reviewId,
     },
@@ -102,7 +97,7 @@ const CustomRateReviewBox = ({
 
     setLoading(false);
 
-    form.reset(); // Clear form after submission
+    form.reset();
   };
 
   return (

@@ -4,17 +4,13 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 const page = async () => {
-  const sessoin = await auth();
+  const session = await auth();
 
-  if (sessoin?.user) {
+  if (session?.user) {
     redirect("/");
   }
 
-  return (
-    // <div className="flex h-full w-full items-center justify-center">
-    <AuthTabs />
-    // </div>
-  );
+  return <AuthTabs />;
 };
 
 export default page;

@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSession } from "next-auth/react";
 import { addProductToComparison } from "@/actions/comparison.action";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,14 +11,11 @@ type Props = {
 
 const ComparisonBox = ({ productId, isCompared }: Props) => {
   const { toast } = useToast();
-  const { data: session } = useSession();
-  const userId = session?.user.id;
 
   const handleCheckBox = async (e: boolean) => {
-    if (userId && productId) {
+    if (productId) {
       const { error, message } = await addProductToComparison({
         productId,
-        userId,
         isCompared: e,
       });
 

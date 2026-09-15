@@ -20,7 +20,7 @@ const ReviewItem = ({ productId, review }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { comment, rating, reviewerName, date, reviewerEmail, id } = review;
+  const { comment, rating, reviewerName, date, reviewerId, id } = review;
 
   const newdate = dayjs(date).format("MMM, YYYY");
 
@@ -42,18 +42,17 @@ const ReviewItem = ({ productId, review }: Props) => {
             <RatingBox rating={rating} />
             <div className="flex items-center gap-2">
               <div
-                className={`h-8 w-8 cursor-pointer rounded border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75 ${!(reviewerEmail === session?.user.email) ? "hidden" : "block"}`}
+                className={`h-8 w-8 cursor-pointer rounded border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75 ${!(reviewerId && reviewerId === session?.user?.id) ? "hidden" : "block"}`}
                 onClick={() => setIsEditing(true)}
               >
                 <FaEdit className={`h-full w-full text-gray-500`} />
               </div>
               <div
-                className={`h-8 w-8 cursor-pointer rounded border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75 ${!(reviewerEmail === session?.user.email) ? "hidden" : "block"}`}
+                className={`h-8 w-8 cursor-pointer rounded border bg-white p-2 transition-all hover:bg-slate-100 active:scale-75 ${!(reviewerId && reviewerId === session?.user?.id) ? "hidden" : "block"}`}
                 onClick={async () => {
                   setIsDeleting(true);
                   await deleteReview({
                     reviewId: id,
-                    reviewerEmail,
                     productId,
                   });
                   setIsDeleting(false);

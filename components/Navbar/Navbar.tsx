@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Link from "next/link";
-import logo from "@/public/assets/logo_light.png";
+import logo from "../../public/assets/logo_light.png";
 import Image from "next/image";
 import ProfileDropdown from "./ProfileDropdown";
 import { Button } from "../ui/button";

@@ -9,6 +9,4 @@ export const PAGE_ROUTES = {
   COMPARE: "/compare",
 };
 
-export const API_ROUTES = {
-  REGISTER: "/api/register",
-};
+export const API_ROUTES = {};

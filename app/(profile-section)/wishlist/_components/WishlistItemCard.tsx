@@ -12,10 +12,9 @@ import { MdDeleteOutline } from "react-icons/md";
 
 type WishlistItemCardProps = {
   item: IWishlistItemWithProduct;
-  wishlistId: string;
 };
 
-const WishlistItemCard = ({ item, wishlistId }: WishlistItemCardProps) => {
+const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
   const { toast } = useToast();
 
   const { thumbnail, title, price, discountPercentage } = item.product;
@@ -29,7 +28,6 @@ const WishlistItemCard = ({ item, wishlistId }: WishlistItemCardProps) => {
     setLoading(true);
 
     const { message, error } = await removeWishlistItem({
-      wishlistId,
       productId: item.product.id,
     });
 

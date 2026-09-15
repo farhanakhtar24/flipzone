@@ -22,15 +22,15 @@ const BreadCrumbLinks = ({ pathname }: Props) => {
       <BreadcrumbList>
         {pathList.map((path, index) => {
           return (
-            <>
-              <BreadcrumbItem key={index}>
+            <React.Fragment key={path.value}>
+              <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link href={path.value}>{path.label}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
               {index < pathList.length - 1 && <BreadcrumbSeparator />}
-            </>
+            </React.Fragment>
           );
         })}
       </BreadcrumbList>

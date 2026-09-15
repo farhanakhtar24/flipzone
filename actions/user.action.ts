@@ -1,7 +1,14 @@
 "use server";
 
 import { db } from "@/db";
+import {
+  requireUser,
+  serverErrorResponse,
+  unauthorizedResponse,
+} from "@/lib/auth-guard";
+import { UpdateUserSchema } from "@/schemas/user";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 export const getUserById = async (id: string) => {
   try {
@@ -31,39 +38,51 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-export const updateUser = async ({
-  name,
-  email,
-  gender,
-  phone,
-  userId,
-}: {
-  name?: string;
-  email?: string;
-  gender?: "MALE" | "FEMALE" | null;
-  phone?: string;
-  userId: string;
-}) => {
+export const updateUser = async (
+  values: z.infer<typeof UpdateUserSchema>,
+) => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const validatedFields = UpdateUserSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      statusCode: 400,
+      success: false,
+      message: "Invalid profile data.",
+      error: validatedFields.error.message,
+    };
+  }
+
+  const { name, email, gender, phone } = validatedFields.data;
+
   try {
-    const user = await db.user.update({
+    if (email) {
+      const emailOwner = await db.user.findUnique({
+        where: { email: email.toLowerCase() },
+        select: { id: true },
+      });
+
+      if (emailOwner && emailOwner.id !== session.user.id) {
+        return {
+          statusCode: 409,
+          success: false,
+          message: "This email is already in use by another account.",
+        };
+      }
+    }
+
+    await db.user.update({
       where: {
-        id: userId,
+        id: session.user.id,
       },
       data: {
-        name,
-        email,
-        gender,
-        phone,
+        ...(name !== undefined && { name }),
+        ...(email !== undefined && { email: email.toLowerCase() }),
+        ...(gender !== undefined && { gender }),
+        ...(phone !== undefined && { phone }),
       },
     });
-
-    if (!user) {
-      return {
-        statusCode: 404,
-        success: false,
-        message: "User not found.",
-      };
-    }
 
     revalidatePath("/", "layout");
 
@@ -74,13 +93,8 @@ export const updateUser = async ({
     };
   } catch (error) {
     console.error("Error updating user:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to update user. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to update user. Please try again later.",
+    );
   }
 };

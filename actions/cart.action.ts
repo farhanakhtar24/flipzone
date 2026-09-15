@@ -1,13 +1,21 @@
 "use server";
 import { db } from "@/db";
 import { ApiResponse, IcartSummary } from "@/interfaces/actionInterface";
+import {
+  requireUser,
+  serverErrorResponse,
+  unauthorizedResponse,
+} from "@/lib/auth-guard";
+import { UpdateCartItemQuantitySchema } from "@/schemas/cart";
 import { revalidatePath } from "next/cache";
 
-export const getUserCart = async (
-  userId: string,
-): Promise<ApiResponse<IcartSummary>> => {
+export const getUserCart = async (): Promise<ApiResponse<IcartSummary>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
   try {
-    // Fetch the user's cart from the database, including items and their associated products
     const cart = await db.cart.findUnique({
       where: { userId },
       include: {
@@ -23,7 +31,7 @@ export const getUserCart = async (
       return {
         statusCode: 404,
         success: false,
-        message: "Cart not found for the given user.",
+        message: "Cart not found.",
       };
     }
 
@@ -48,7 +56,6 @@ export const getUserCart = async (
       totalQuantity += quantity;
     });
 
-    // Create a summary object to return in the response
     const cartSummary: IcartSummary = {
       cart,
       totalMRP,
@@ -65,35 +72,48 @@ export const getUserCart = async (
     };
   } catch (error) {
     console.error("Error fetching cart:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to fetch the cart. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to fetch the cart. Please try again later.",
+    );
   }
 };
-export const updateCartItemQuantity = async (
-  cartItemId: string,
-  quantityChange: number, // Positive or negative value indicating increment or decrement
-): Promise<ApiResponse<null>> => {
+
+export const updateCartItemQuantity = async (values: {
+  cartItemId: string;
+  quantityChange: number;
+}): Promise<ApiResponse<null>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  const validatedFields = UpdateCartItemQuantitySchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      statusCode: 400,
+      success: false,
+      message: "Invalid cart data.",
+    };
+  }
+
+  const { cartItemId, quantityChange } = validatedFields.data;
+
   try {
-    // Start a transaction
     const result = await db.$transaction(async (prisma) => {
-      // Find the cart item and product stock
       const cartItem = await prisma.cartItem.findUnique({
         where: {
           id: cartItemId,
         },
         include: {
-          product: true, // Include the related product to check its stock
+          product: true,
+          cart: {
+            select: { userId: true },
+          },
         },
       });
 
-      // If the cart item is not found, return a 404 response
-      if (!cartItem) {
+      // Ownership check: only operate on cart items that belong to the user
+      if (!cartItem || cartItem.cart.userId !== userId) {
         return {
           statusCode: 404,
           success: false,
@@ -101,10 +121,8 @@ export const updateCartItemQuantity = async (
         };
       }
 
-      // Calculate the new quantity based on the change
       const newQuantity = cartItem.quantity + quantityChange;
 
-      // If the new quantity is less than or equal to 0, delete the cart item
       if (newQuantity <= 0) {
         await prisma.cartItem.delete({
           where: {
@@ -112,14 +130,12 @@ export const updateCartItemQuantity = async (
           },
         });
 
-        // Check if there are any remaining items in the cart
         const remainingItems = await prisma.cartItem.findMany({
           where: {
             cartId: cartItem.cartId,
           },
         });
 
-        // If no items remain in the cart, delete the cart itself
         if (remainingItems.length === 0) {
           await prisma.cart.delete({
             where: {
@@ -141,7 +157,6 @@ export const updateCartItemQuantity = async (
         };
       }
 
-      // Check if the new quantity exceeds available stock
       if (newQuantity > cartItem.product.stock) {
         return {
           statusCode: 400,
@@ -150,7 +165,6 @@ export const updateCartItemQuantity = async (
         };
       }
 
-      // Otherwise, update the cart item with the new quantity
       await prisma.cartItem.update({
         where: {
           id: cartItemId,
@@ -169,45 +183,38 @@ export const updateCartItemQuantity = async (
       };
     });
 
-    // Optionally, trigger any revalidation if necessary
     revalidatePath("/", "layout");
 
-    // Return the result of the transaction (success)
     return result;
   } catch (error) {
     console.error("Error updating cart item quantity:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to update cart item quantity. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to update cart item quantity. Please try again later.",
+    );
   }
 };
 
-export const placeOrderFromCart = async (
-  cartId: string,
-): Promise<ApiResponse<null>> => {
+export const placeOrderFromCart = async (): Promise<ApiResponse<null>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
   try {
-    // Start a transaction
     const result = await db.$transaction(async (prisma) => {
-      // Find the user's cart with its items
       const cart = await prisma.cart.findUnique({
         where: {
-          id: cartId,
+          userId,
         },
         include: {
           items: {
             include: {
-              product: true, // Include product details to adjust stock
+              product: true,
             },
           },
         },
       });
 
-      // If the cart is not found or empty, return a 404 response
       if (!cart || cart.items.length === 0) {
         return {
           statusCode: 404,
@@ -216,7 +223,6 @@ export const placeOrderFromCart = async (
         };
       }
 
-      // Validate stock for each item before placing the order
       for (const item of cart.items) {
         if (item.quantity > item.product.stock) {
           return {
@@ -227,15 +233,14 @@ export const placeOrderFromCart = async (
         }
       }
 
-      // Create an order object with ordered items from the cart
       await prisma.order.create({
         data: {
-          userId: cart.userId,
+          userId,
           total: cart.items.reduce(
             (total, item) => total + item.product.price * item.quantity,
             0,
-          ), // Calculate total price
-          status: "PLACED", // Initial order status
+          ),
+          status: "PLACED",
           items: {
             create: cart.items.map((cartItem) => ({
               quantity: cartItem.quantity,
@@ -249,28 +254,26 @@ export const placeOrderFromCart = async (
         },
       });
 
-      // After the order is created, update the product stock
       for (const item of cart.items) {
         await prisma.product.update({
           where: { id: item.productId },
           data: {
             stock: {
-              decrement: item.quantity, // Reduce stock by the ordered quantity
+              decrement: item.quantity,
             },
           },
         });
       }
 
-      // Delete the cart and its items after the order is placed
       await prisma.cartItem.deleteMany({
         where: {
-          cartId: cartId,
+          cartId: cart.id,
         },
       });
 
       await prisma.cart.delete({
         where: {
-          id: cartId,
+          id: cart.id,
         },
       });
 
@@ -281,19 +284,13 @@ export const placeOrderFromCart = async (
       };
     });
 
-    // Optionally, trigger any revalidation if necessary
     revalidatePath("/", "layout");
 
     return result;
   } catch (error) {
     console.error("Error placing order:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to place order. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to place order. Please try again later.",
+    );
   }
 };

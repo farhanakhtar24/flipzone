@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { Button } from "../ui/button";
-import { useSession } from "next-auth/react";
 import Spinner from "../ui/spinner";
 import { addToCart } from "@/actions/product.action";
 import { useToast } from "@/hooks/use-toast";
@@ -33,13 +32,11 @@ const BuyNowButton = ({
   setIsBuyingNow,
 }: BuyNowButtonProps) => {
   const router = useRouter();
-  const { data: session } = useSession();
-  const userId = session?.user.id;
 
   const handleSubmit = async () => {
-    if (userId && productId) {
+    if (productId) {
       setIsBuyingNow(true);
-      await addToCart({ userId, productId });
+      await addToCart({ productId });
       router.push(PAGE_ROUTES.CART);
       setIsBuyingNow(false);
     }
@@ -69,16 +66,12 @@ const AddToCartButton = ({
   setIsAddingToCart,
 }: AddingToCartProps) => {
   const { toast } = useToast();
-  const { data: session } = useSession();
-
-  const userId = session?.user.id;
 
   const handleSubmit = async () => {
-    if (userId && productId) {
+    if (productId) {
       setIsAddingToCart(true);
 
       const { error, message } = await addToCart({
-        userId,
         productId,
       });
 
@@ -138,15 +131,12 @@ const GoToCartButton = () => {
 };
 
 const WishListButton = ({ productId, isWishlisted }: WishlistingProps) => {
-  const { data: session } = useSession();
-  const userId = session?.user.id;
   const { toast } = useToast();
 
   const handleSubmit = async () => {
-    if (userId && productId) {
+    if (productId) {
       const { error, message } = await wishlistItem({
         productId,
-        userId,
         wishListedItem: !isWishlisted,
       });
 

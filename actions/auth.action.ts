@@ -1,27 +1,26 @@
 "use server";
 
 import { signIn, signOut } from "@/auth";
+import { db } from "@/db";
+import { rateLimit } from "@/lib/rate-limit";
 import { AuthError } from "next-auth";
-import { revalidatePath } from "next/cache";
 import { getUserByEmail } from "./user.action";
 import * as z from "zod";
 import { LoginSchema, SignUpSchema } from "@/schemas/auth";
-import { API_ROUTES, PAGE_ROUTES } from "@/routes";
-import { apiClient } from "@/util/axios";
+import { PAGE_ROUTES } from "@/routes";
+import { saltAndHashPassword } from "@/util/helper";
 
 export const login = async (provider: string) => {
+  // signIn throws a NEXT_REDIRECT on success — no code after this runs.
   await signIn(provider, {
     redirectTo: "/",
   });
-  revalidatePath("/", "layout");
 };
 
 export const logout = async () => {
   await signOut({
     redirectTo: PAGE_ROUTES.AUTH,
   });
-
-  revalidatePath("/", "layout");
 };
 
 export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
@@ -33,10 +32,14 @@ export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
 
   const { email, password } = validatedFields.data;
 
-  const existingUser = await getUserByEmail(email);
+  const { success } = rateLimit({
+    key: `login:${email.toLowerCase()}`,
+    limit: 5,
+    windowMs: 60_000,
+  });
 
-  if (!existingUser) {
-    return { error: "User does not exist!" };
+  if (!success) {
+    return { error: "Too many attempts. Please try again in a minute." };
   }
 
   try {
@@ -47,18 +50,12 @@ export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
     });
   } catch (error: unknown | AuthError) {
     if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CallbackRouteError":
-          return { error: "Invalid password!" };
-        default:
-          return { error: error.message };
-      }
+      // Unified failure message to prevent user enumeration
+      return { error: "Invalid credentials!" };
     }
 
     throw error;
   }
-
-  revalidatePath("/", "layout");
 };
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
@@ -69,20 +66,42 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   }
 
   const { email, password, name } = validatedFields.data;
+  const normalizedEmail = email.toLowerCase();
+
+  const { success } = rateLimit({
+    key: `signup:${normalizedEmail}`,
+    limit: 5,
+    windowMs: 60_000,
+  });
+
+  if (!success) {
+    return { error: "Too many attempts. Please try again in a minute." };
+  }
+
   try {
-    await apiClient.post(API_ROUTES.REGISTER, {
-      name,
-      email,
-      password,
+    const existingUser = await getUserByEmail(normalizedEmail);
+
+    if (existingUser) {
+      return { error: "Unable to create account with these details." };
+    }
+
+    const hashedPassword = await saltAndHashPassword(password);
+
+    await db.user.create({
+      data: {
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+      },
     });
 
     await loginWithCreds({
-      email,
+      email: normalizedEmail,
       password,
     });
   } catch (error: unknown | AuthError) {
     if (error instanceof AuthError) {
-      return { error: error.message };
+      return { error: "Something went wrong during sign up. Please try again." };
     }
 
     throw error;

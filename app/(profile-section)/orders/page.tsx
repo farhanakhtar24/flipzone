@@ -12,7 +12,7 @@ const page = async () => {
     return <div>User not found</div>;
   }
 
-  const { data, error, message } = await getUserOrders(session.user.id);
+  const { data, error, message } = await getUserOrders();
 
   if (error) {
     return (
@@ -29,12 +29,6 @@ const page = async () => {
       </div>
     );
   }
-
-  if (message) {
-    console.log("message :", message);
-  }
-
-  console.log({ data });
 
   return (
     <div className="flex h-fit flex-col">

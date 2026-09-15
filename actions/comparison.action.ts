@@ -2,19 +2,37 @@
 
 import { db } from "@/db";
 import { ApiResponse } from "@/interfaces/actionInterface";
+import {
+  requireUser,
+  serverErrorResponse,
+  unauthorizedResponse,
+} from "@/lib/auth-guard";
+import { ComparisonItemSchema } from "@/schemas/comparison";
 import { revalidatePath } from "next/cache";
 
-export const addProductToComparison = async ({
-  productId,
-  userId,
-  isCompared,
-}: {
+const MAX_COMPARISON_ITEMS = 4;
+
+export const addProductToComparison = async (values: {
   productId: string;
-  userId: string;
   isCompared: boolean;
 }): Promise<ApiResponse<null>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  const validatedFields = ComparisonItemSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      statusCode: 400,
+      success: false,
+      message: "Invalid comparison data.",
+    };
+  }
+
+  const { productId, isCompared } = validatedFields.data;
+
   try {
-    // Check if there is an existing comparison list for the user
     const comparisonList = await db.comparison.findUnique({
       where: {
         userId,
@@ -25,9 +43,7 @@ export const addProductToComparison = async ({
     });
 
     if (isCompared) {
-      // If isCompared is true, add the product to the comparison list
       if (!comparisonList) {
-        // If no comparison list exists, create one and add the product
         await db.comparison.create({
           data: {
             userId,
@@ -39,43 +55,46 @@ export const addProductToComparison = async ({
           },
         });
       } else {
-        // Check if the product is already in the comparison list
         const isProductInComparison = comparisonList.items.some(
           (item) => item.productId === productId,
         );
 
-        if (!isProductInComparison) {
-          // If the product is not in the comparison list, add it
-          await db.comparison.update({
-            where: {
-              userId,
-            },
-            data: {
-              items: {
-                create: {
-                  productId,
-                },
-              },
-            },
-          });
-        } else {
+        if (isProductInComparison) {
           return {
             success: true,
             message: "Product is already in the comparison list",
             statusCode: 200,
           };
         }
+
+        if (comparisonList.items.length >= MAX_COMPARISON_ITEMS) {
+          return {
+            statusCode: 400,
+            success: false,
+            message: `You can compare up to ${MAX_COMPARISON_ITEMS} products.`,
+          };
+        }
+
+        await db.comparison.update({
+          where: {
+            userId,
+          },
+          data: {
+            items: {
+              create: {
+                productId,
+              },
+            },
+          },
+        });
       }
     } else {
-      // If isCompared is false, remove the product from the comparison list
       if (comparisonList) {
-        // Check if the product exists in the comparison list
         const isProductInComparison = comparisonList.items.some(
           (item) => item.productId === productId,
         );
 
         if (isProductInComparison) {
-          // Remove the product from the comparison list
           await db.comparisonItem.deleteMany({
             where: {
               productId,
@@ -83,7 +102,6 @@ export const addProductToComparison = async ({
             },
           });
 
-          // Check if the comparison list is empty after removal
           const updatedComparisonList = await db.comparison.findUnique({
             where: {
               userId,
@@ -93,7 +111,6 @@ export const addProductToComparison = async ({
             },
           });
 
-          // If the comparison list is empty, delete the list itself
           if (
             updatedComparisonList &&
             updatedComparisonList.items.length === 0
@@ -104,19 +121,7 @@ export const addProductToComparison = async ({
               },
             });
           }
-        } else {
-          return {
-            success: true,
-            message: "Product not found in the comparison list",
-            statusCode: 404,
-          };
         }
-      } else {
-        return {
-          success: true,
-          message: "No comparison list found for the user",
-          statusCode: 404,
-        };
       }
     }
 
@@ -131,14 +136,8 @@ export const addProductToComparison = async ({
     };
   } catch (error) {
     console.error("Error updating comparison list:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred.";
-
-    return {
-      statusCode: 500,
-      success: false,
-      message: "Failed to update comparison list. Please try again later.",
-      error: errorMessage,
-    };
+    return serverErrorResponse(
+      "Failed to update comparison list. Please try again later.",
+    );
   }
 };

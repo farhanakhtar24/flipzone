@@ -19,7 +19,7 @@ const page = async () => {
     );
   }
 
-  const { data: cartData, message, error } = await getUserCart(session.user.id);
+  const { data: cartData, message, error } = await getUserCart();
 
   if (error) {
     return (
@@ -28,12 +28,6 @@ const page = async () => {
       </Wrapper>
     );
   }
-
-  if (message) {
-    console.log("message :", message);
-  }
-
-  console.log({ cartData });
 
   return (
     <Wrapper>
