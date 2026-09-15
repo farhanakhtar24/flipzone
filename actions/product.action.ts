@@ -29,8 +29,10 @@ export const getAllProducts = async (
     category?: string;
     sortBy?: string;
     inStock?: string;
+    page?: number;
+    pageSize?: number;
   },
-): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+): Promise<ApiResponse<IproductWithCartStatus[]> & { totalCount?: number }> => {
   const session = await requireUser();
   if (!session) return unauthorizedResponse();
 
@@ -91,33 +93,48 @@ export const getAllProducts = async (
       [sortField]: sortDirection,
     };
 
-    // Fetch products with cart/wishlist info for checking user status
-    const products = await db.product.findMany({
-      where,
-      orderBy,
-      include: {
-        cartItems: {
-          where: {
-            cart: {
-              userId,
-            },
-          },
-          select: {
-            id: true,
+    // Pagination — page is 1-based; when absent, return everything (home rails).
+    const page =
+      filters?.page && Number.isFinite(filters.page) && filters.page > 0
+        ? Math.floor(filters.page)
+        : undefined;
+    const pageSize =
+      filters?.pageSize && Number.isFinite(filters.pageSize) && filters.pageSize > 0
+        ? Math.min(Math.floor(filters.pageSize), 48)
+        : 24;
+
+    const include = {
+      cartItems: {
+        where: {
+          cart: {
+            userId,
           },
         },
-        wishlistItems: {
-          where: {
-            wishlist: {
-              userId,
-            },
-          },
-          select: {
-            id: true,
-          },
+        select: {
+          id: true,
         },
       },
-    });
+      wishlistItems: {
+        where: {
+          wishlist: {
+            userId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      },
+    };
+
+    const [products, totalCount] = await Promise.all([
+      db.product.findMany({
+        where,
+        orderBy,
+        include,
+        ...(page && { skip: (page - 1) * pageSize, take: pageSize }),
+      }),
+      db.product.count({ where }),
+    ]);
 
     const productsWithCartStatus = products.map(
       ({ cartItems, wishlistItems, ...product }) => ({
@@ -132,10 +149,149 @@ export const getAllProducts = async (
       success: true,
       message: "Products fetched successfully.",
       data: productsWithCartStatus,
+      totalCount,
     };
   } catch (error) {
     console.error("Error fetching products:", error);
     return serverErrorResponse("Failed to fetch products. Please try again later.");
+  }
+};
+
+/** Fetch several products by id (e.g. recently-viewed list), keeping input order. */
+export const getProductsByIds = async (
+  ids: string[],
+): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  try {
+    const products = await db.product.findMany({
+      where: { id: { in: ids } },
+      include: {
+        cartItems: {
+          where: { cart: { userId } },
+          select: { id: true },
+        },
+        wishlistItems: {
+          where: { wishlist: { userId } },
+          select: { id: true },
+        },
+      },
+    });
+
+    const byId = new Map(
+      products.map(({ cartItems, wishlistItems, ...p }) => [
+        p.id,
+        {
+          ...p,
+          isInCart: cartItems.length > 0,
+          isWishlisted: wishlistItems.length > 0,
+        },
+      ]),
+    );
+    const ordered = ids
+      .map((id) => byId.get(id))
+      .filter(Boolean) as IproductWithCartStatus[];
+
+    return {
+      statusCode: 200,
+      success: true,
+      message: "Products fetched successfully.",
+      data: ordered,
+    };
+  } catch (error) {
+    console.error("Error fetching products by ids:", error);
+    return serverErrorResponse("Failed to fetch products. Please try again later.");
+  }
+};
+
+/**
+ * Similar products for a PDP "Related" rail: same leaf category first, then
+ * same top-level group, scored by brand/price proximity in the caller.
+ */
+export const getRelatedProducts = async (
+  productId: string,
+  limit = 8,
+): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  try {
+    const product = await db.product.findUnique({
+      where: { id: productId },
+      include: { categories: { include: { category: true } } },
+    });
+    if (!product) {
+      return {
+        statusCode: 404,
+        success: false,
+        message: "Product not found.",
+      };
+    }
+
+    const leafSlugs = product.categories.map((pc) => pc.category.name);
+
+    const candidates = await db.product.findMany({
+      where: {
+        id: { not: productId },
+        ...(leafSlugs.length
+          ? {
+              categories: {
+                some: { category: { name: { in: leafSlugs } } },
+              },
+            }
+          : {}),
+      },
+      orderBy: { rating: "desc" },
+      take: limit * 3,
+      include: {
+        categories: { include: { category: true } },
+        cartItems: {
+          where: { cart: { userId } },
+          select: { id: true },
+        },
+        wishlistItems: {
+          where: { wishlist: { userId } },
+          select: { id: true },
+        },
+      },
+    });
+
+    const scored = candidates
+      .map(({ cartItems, wishlistItems, categories, ...p }) => {
+        const sharedLeaves = categories.filter((pc) =>
+          leafSlugs.includes(pc.category.name),
+        ).length;
+        const brandBoost = p.brand && p.brand === product.brand ? 2 : 0;
+        const priceBoost =
+          product.price > 0 &&
+          Math.abs(p.price - product.price) <= product.price * 0.3
+            ? 1
+            : 0;
+        return {
+          ...p,
+          isInCart: cartItems.length > 0,
+          isWishlisted: wishlistItems.length > 0,
+          score: sharedLeaves * 3 + brandBoost + priceBoost + (p.rating ?? 0) / 10,
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(({ score, ...p }) => p);
+
+    return {
+      statusCode: 200,
+      success: true,
+      message: "Related products fetched successfully.",
+      data: scored,
+    };
+  } catch (error) {
+    console.error("Error fetching related products:", error);
+    return serverErrorResponse("Failed to fetch related products.");
   }
 };
 
@@ -343,5 +499,129 @@ export const getProductById = async (
     return serverErrorResponse(
       "Failed to fetch product. Please try again later.",
     );
+  }
+};
+
+export interface HomeRails {
+  deals: IproductWithCartStatus[];
+  bestsellers: IproductWithCartStatus[];
+  newArrivals: IproductWithCartStatus[];
+  recommended: IproductWithCartStatus[];
+}
+
+/**
+ * The four product rails the marketplace home page renders. "recommended" is
+ * personalized from the user's own categories (wishlist/orders) when signed in
+ * behavior is available, falling back to bestsellers.
+ */
+export const getHomeRails = async (
+  recentIds: string[] = [],
+): Promise<ApiResponse<HomeRails>> => {
+  const session = await requireUser();
+  if (!session) return unauthorizedResponse();
+
+  const userId = session.user.id;
+
+  const statusInclude = {
+    cartItems: {
+      where: { cart: { userId } },
+      select: { id: true },
+    },
+    wishlistItems: {
+      where: { wishlist: { userId } },
+      select: { id: true },
+    },
+  };
+
+  const mapWithStatus = (
+    rows: Array<
+      Prisma.ProductGetPayload<{ include: typeof statusInclude }>
+    >,
+  ): IproductWithCartStatus[] =>
+    rows.map(({ cartItems, wishlistItems, ...p }) => ({
+      ...p,
+      isInCart: cartItems.length > 0,
+      isWishlisted: wishlistItems.length > 0,
+    }));
+
+  try {
+    const [deals, bestsellers, newArrivals, favorites] = await Promise.all([
+      db.product.findMany({
+        where: { discountPercentage: { gte: 25 }, stock: { gte: 1 } },
+        orderBy: { discountPercentage: "desc" },
+        take: 10,
+        include: statusInclude,
+      }),
+      db.product.findMany({
+        where: { stock: { gte: 1 } },
+        orderBy: [{ rating: "desc" }],
+        take: 10,
+        include: statusInclude,
+      }),
+      db.product.findMany({
+        where: { stock: { gte: 1 } },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: statusInclude,
+      }),
+      // categories the user engaged with (recently-viewed ids take priority,
+      // else their ordered/wishlisted categories)
+      recentIds.length
+        ? db.productCategory.findMany({
+            where: { productId: { in: recentIds } },
+            select: { categoryId: true },
+          })
+        : db.productCategory.findMany({
+            where: {
+              OR: [
+                {
+                  product: {
+                    orderItems: { some: { order: { userId } } },
+                  },
+                },
+                {
+                  product: {
+                    wishlistItems: { some: { wishlist: { userId } } },
+                  },
+                },
+              ],
+            },
+            select: { categoryId: true },
+          }),
+    ]);
+
+    let recommended: IproductWithCartStatus[] = [];
+    const favoriteCategoryIds = favorites.map((f) => f.categoryId);
+    if (favoriteCategoryIds.length > 0) {
+      const rows = await db.product.findMany({
+        where: {
+          stock: { gte: 1 },
+          id: { notIn: recentIds },
+          categories: { some: { categoryId: { in: favoriteCategoryIds } } },
+        },
+        orderBy: { rating: "desc" },
+        take: 10,
+        include: statusInclude,
+      });
+      recommended = mapWithStatus(rows);
+    }
+    if (recommended.length === 0) {
+      recommended = mapWithStatus(bestsellers);
+    }
+
+    return {
+      statusCode: 200,
+      success: true,
+      message: "Home rails fetched successfully.",
+      data: {
+        deals: mapWithStatus(deals),
+        bestsellers: mapWithStatus(bestsellers),
+        newArrivals: mapWithStatus(newArrivals),
+        recommended,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching home rails:", error);
+    return serverErrorResponse("Failed to fetch products for the home page.");
   }
 };
