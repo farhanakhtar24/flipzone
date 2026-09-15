@@ -1,12 +1,28 @@
 import { getAllCategories } from "@/actions/category.action";
 import Wrapper from "@/components/Wrapper/Wrapper";
-import { Card, CardContent } from "@/components/ui/card";
 import { PAGE_ROUTES } from "@/routes";
 import { auth } from "@/auth";
 import Link from "next/link";
-import { ChevronRight, ShoppingBag } from "lucide-react";
+import {
+  ChevronRight,
+  Cpu,
+  Gem,
+  ShoppingBasket,
+  Shirt,
+  Sofa,
+  Sparkles,
+} from "lucide-react";
+import { CATEGORY_GROUPS, categoryLabel } from "@/constant/CategoryGroups";
 
 export const dynamic = "force-dynamic";
+
+const GROUP_ICONS: Record<string, typeof Cpu> = {
+  electronics: Cpu,
+  fashion: Shirt,
+  "home-living": Sofa,
+  "beauty-care": Sparkles,
+  "groceries-sports": ShoppingBasket,
+};
 
 const CategoriesPage = async () => {
   const session = await auth();
@@ -14,7 +30,7 @@ const CategoriesPage = async () => {
   if (!session?.user?.id) {
     return (
       <Wrapper>
-        <div className="py-20 text-center text-muted-foreground">
+        <div className="text-muted-foreground py-20 text-center">
           Please sign in to browse categories.
         </div>
       </Wrapper>
@@ -26,46 +42,58 @@ const CategoriesPage = async () => {
   if (error) {
     return (
       <Wrapper>
-        <div className="py-20 text-center text-destructive">{error}</div>
+        <div className="text-destructive py-20 text-center">{error}</div>
       </Wrapper>
     );
   }
 
+  const counts = new Map((categories ?? []).map((c) => [c.name, c]));
+
   return (
     <Wrapper>
       <section className="py-10">
-        <h1 className="mb-8 text-3xl font-bold tracking-tight">
-          All Categories
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">
+          Shop by Category
         </h1>
+        <p className="text-muted-foreground mb-10">
+          Browse {categories?.length ?? 0} departments across the whole store.
+        </p>
 
-        {!categories || categories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground" />
-            <p className="text-lg text-muted-foreground">
-              No categories available yet.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`${PAGE_ROUTES.PRODUCTS}?category=${encodeURIComponent(
-                  category.name,
-                )}`}
-              >
-                <Card className="group h-full transition-all hover:shadow-md hover:ring-1 hover:ring-primary/20">
-                  <CardContent className="flex items-center justify-between p-6">
-                    <span className="text-lg font-medium capitalize">
-                      {category.name}
-                    </span>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
+        <div className="space-y-12">
+          {CATEGORY_GROUPS.map((group) => {
+            const Icon = GROUP_ICONS[group.slug] ?? Gem;
+            const leaves = group.leaves.filter((l) => counts.has(l.slug));
+            if (leaves.length === 0) return null;
+            return (
+              <div key={group.slug}>
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-lg">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h2 className="text-xl font-semibold tracking-tight">
+                    {group.label}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {leaves.map((leaf) => (
+                    <Link
+                      key={leaf.slug}
+                      href={`${PAGE_ROUTES.PRODUCTS}?category=${encodeURIComponent(
+                        leaf.slug,
+                      )}`}
+                      className="group bg-card hover:ring-primary/30 flex items-center justify-between rounded-xl border p-5 transition-all hover:shadow-md hover:ring-1"
+                    >
+                      <span className="font-medium">
+                        {categoryLabel(leaf.slug)}
+                      </span>
+                      <ChevronRight className="text-muted-foreground h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
     </Wrapper>
   );

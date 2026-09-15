@@ -135,9 +135,20 @@ interface DummyjsonProduct {
 
 async function seed() {
   // Step 0: clear catalog tables. Child rows first; onDelete: Cascade also
-  // covers reviews, but explicit order makes the intent obvious. User/Account/
-  // Cart/Wishlist/Comparison/Order/OrderedItem/Address are NOT touched.
+  // covers reviews, but explicit order makes the intent obvious. OrderedItem /
+  // CartItem / WishlistItem / ComparisonItem reference Product and would
+  // violate the relation when products are deleted, so those (and their empty
+  // parents) are wiped too — this is a demo catalog reset, not a user-scoped
+  // wipe. User/Account/Address stay intact.
   console.log("Clearing catalog tables...");
+  await db.orderedItem.deleteMany({});
+  await db.order.deleteMany({});
+  await db.cartItem.deleteMany({});
+  await db.cart.deleteMany({});
+  await db.wishlistItem.deleteMany({});
+  await db.wishlist.deleteMany({});
+  await db.comparisonItem.deleteMany({});
+  await db.comparison.deleteMany({});
   await db.review.deleteMany({});
   await db.productCategory.deleteMany({});
   await db.product.deleteMany({});
