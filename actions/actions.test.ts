@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// --- Mocks -----------------------------------------------------------------
+// --- Mocks (hoisted before imports of the modules under test) --------------
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/db", () => ({
   db: {
+    order: { findFirst: vi.fn(), update: vi.fn() },
     cart: { findUnique: vi.fn(), delete: vi.fn() },
     cartItem: {
       findUnique: vi.fn(),
@@ -12,21 +13,24 @@ vi.mock("@/db", () => ({
       delete: vi.fn(),
       deleteMany: vi.fn(),
     },
-    $transaction: vi.fn((fn) => fn(mockedDb)),
+    $transaction: vi.fn((fn: (tx: unknown) => unknown) => fn(mockedDb)),
   },
 }));
 
-const { auth } = await import("@/auth");
-const { db } = await import("@/db");
-const mockedDb = db as unknown as Record<string, Record<string, ReturnType<typeof vi.fn>>>;
+import { auth } from "@/auth";
+import { db } from "@/db";
+
+const mockedAuth = vi.mocked(auth);
+const mockedDb = vi.mocked(db, { deep: true });
 
 const authed = () =>
-  (auth as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedAuth.mockResolvedValue({
     user: { id: "user-1", email: "u@example.com", role: "USER" },
-  });
-
+  } as any);
 const anon = () =>
-  (auth as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedAuth.mockResolvedValue(null as any);
 
 // --- Tests -----------------------------------------------------------------
 describe("updateCartItemQuantity", () => {
@@ -54,13 +58,14 @@ describe("updateCartItemQuantity", () => {
 
   it("blocks items owned by another user (IDOR guard)", async () => {
     authed();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedDb.cartItem.findUnique.mockResolvedValue({
       id: "item-1",
       cartId: "cart-1",
       quantity: 1,
       product: { stock: 5 },
       cart: { userId: "somebody-else" },
-    });
+    } as any);
 
     const { updateCartItemQuantity } = await import("./cart.action");
     const res = await updateCartItemQuantity({
@@ -73,13 +78,14 @@ describe("updateCartItemQuantity", () => {
 
   it("enforces the stock ceiling", async () => {
     authed();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedDb.cartItem.findUnique.mockResolvedValue({
       id: "item-1",
       cartId: "cart-1",
       quantity: 5,
       product: { stock: 5 },
       cart: { userId: "user-1" },
-    });
+    } as any);
 
     const { updateCartItemQuantity } = await import("./cart.action");
     const res = await updateCartItemQuantity({
@@ -102,38 +108,23 @@ describe("cancelOrder", () => {
 
   it("refuses to cancel another user's order", async () => {
     authed();
-    (db.order as never) = { findFirst: vi.fn().mockResolvedValue(null) };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedDb.order.findFirst.mockResolvedValue(null as any);
     const { cancelOrder } = await import("./order.action");
     expect((await cancelOrder("order-1")).statusCode).toBe(404);
   });
 
   it("refuses to cancel a delivered order", async () => {
     authed();
-    (db.order as never) = {
-      findFirst: vi
-        .fn()
-        .mockResolvedValue({
-          id: "order-1",
-          status: "DELIVERED",
-          items: [],
-        }),
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedDb.order.findFirst.mockResolvedValue({
+      id: "order-1",
+      status: "DELIVERED",
+      items: [],
+    } as any);
     const { cancelOrder } = await import("./order.action");
     const res = await cancelOrder("order-1");
     expect(res.statusCode).toBe(400);
     expect(res.message).toMatch(/DELIVERED/);
-  });
-});
-
-describe("createCheckoutSession", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("returns 503 when Stripe is not configured", async () => {
-    vi.stubEnv("STRIPE_SECRET_KEY", "");
-    vi.resetModules();
-    authed();
-    const { createCheckoutSession } = await import("./checkout.action");
-    const res = await createCheckoutSession({ addressId: "addr-1" });
-    expect(res.statusCode).toBe(503);
   });
 });

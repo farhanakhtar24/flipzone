@@ -47,7 +47,11 @@ const Navbar = async () => {
               <div className="hidden md:block">
                 <CategoryDropdown />
               </div>
-              <ProfileDropdown name={user?.name} imgUrl={user?.image} />
+              <ProfileDropdown
+                name={user?.name}
+                imgUrl={user?.image}
+                isAdmin={session.user.role === "ADMIN"}
+              />
             </>
           )}
         </div>

@@ -19,9 +19,10 @@ import { FaRegHeart } from "react-icons/fa";
 type Props = {
   name: string | null | undefined;
   imgUrl: string | null | undefined;
+  isAdmin?: boolean;
 };
 
-const ProfileDropdown = ({ name, imgUrl }: Props) => {
+const ProfileDropdown = ({ name, imgUrl, isAdmin }: Props) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger aria-label="Open profile menu">
@@ -72,6 +73,13 @@ const ProfileDropdown = ({ name, imgUrl }: Props) => {
             Orders
           </DropdownMenuItem>
         </Link>
+        {isAdmin && (
+          <Link href="/admin">
+            <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+              Admin dashboard
+            </DropdownMenuItem>
+          </Link>
+        )}
         <DropdownMenuItem
           onClick={() => logout()}
           className="cursor-pointer text-red-600"

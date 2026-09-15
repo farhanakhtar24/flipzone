@@ -1,116 +1,90 @@
-# E-Commerce App
+# Flipzone
 
-## Overview
-
-This repository hosts the source code for a feature-rich e-commerce application. The app provides a seamless shopping experience, including features like user authentication, product browsing, cart management, wishlist, order tracking, and more.
-
----
+A full-featured e-commerce storefront built with the Next.js App Router, MongoDB (Prisma), Auth.js v5, Stripe Checkout, and shadcn/ui + Tailwind.
 
 ## Features
 
-### Authentication and User Management
+- **Catalog** — product grid with search, faceted filters (category, brand, price range, rating, discount, in-stock), sorting, and tag chips
+- **Product pages** — gallery, specs, star ratings & reviews (authorship tied to your account), wishlist, compare tray
+- **Compare** — side-by-side spec table for up to 4 products
+- **Cart & checkout** — quantity guards against live stock, saved address book, **Stripe Checkout** with webhook-driven fulfillment
+- **Orders** — full lifecycle (`PENDING → PAID → SHIPPED → DELIVERED`, user-cancellable), line-item price snapshots, Resend confirmation email
+- **Auth** — GitHub / Google OAuth + credentials (bcrypt), JWT sessions, route middleware
+- **UI** — dark mode, responsive, accessible (Radix primitives, labeled controls)
+- **Ops** — security headers, rate-limited auth, zod-validated server actions, CI, Docker
 
-- **Full Authentication**: OAuth integration, protected routes, and error handling.
-- **Profile Management**: Edit and update user profiles with a dedicated UI and APIs.
-- **Custom Middleware**: Middleware configurations for session management and security.
+## Stack
 
-### Product Browsing and Filtering
+| Layer     | Tech |
+|-----------|------|
+| Framework | Next.js 14 (App Router, RSC, server actions) |
+| Auth      | Auth.js v5 (JWT + Prisma adapter) |
+| DB        | MongoDB + Prisma 5 (transactions, `db push`) |
+| Payments  | Stripe Checkout + signed webhooks (test mode) |
+| Email     | Resend |
+| Styling   | Tailwind, shadcn/ui (new-york), Radix, next-themes |
+| Tests     | Vitest + Testing Library, Playwright |
+| Deploy    | Vercel + MongoDB Atlas (or `docker compose up`) |
 
-- **Product Page**: Detailed product pages with features like specifications table, ratings, photo gallery, and price details.
-- **Category Filters**: Filter products by category, price, stock status, and sorting options.
-- **Search**: Integrated search bar for quick product lookups.
+## Quick start
 
-### Cart and Wishlist
+```bash
+cp .env.example .env          # fill in DATABASE_URL + AUTH_SECRET (npx auth secret)
+npm install
+npx prisma db push            # sync schema
+npm run seed                  # 100 products + demo user (demo@flipzone.dev / DemoPass123)
+npm run dev
+```
 
-- **Cart Management**: Dynamic cart page with increment/decrement actions, order placement, and redirection to the orders page.
-- **Wishlist**: APIs for adding/removing items from the wishlist and a dedicated wishlist page.
+### Payments (optional but recommended)
 
-### Order Management
+```bash
+# in another terminal — requires the Stripe CLI
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+# copy the printed whsec_… into STRIPE_WEBHOOK_SECRET
+```
 
-- **Orders Page**: View and manage orders with actions to fetch all orders or a specific order by ID.
+Checkout works in test mode — use Stripe's `4242 4242 4242 4242` card.
 
-### Reviews and Ratings
+### With Docker
 
-- **Review System**: Users can add, edit, and delete reviews for purchased products.
-- **Review Management**: Functionalities for rendering and managing review items.
+```bash
+docker compose up --build
+# then seed from the app container:
+docker compose exec app npm run seed
+```
 
-### Comparison and Other Features
+Compose brings up MongoDB as a **single-node replica set** (Prisma requires transactions).
 
-- **Comparison Feature**: Compare up to four products simultaneously.
-- **UI Enhancements**: Optimized layout, navigation bar, and toast notifications for actions.
+## Scripts
 
----
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm run build` / `start` | Production build / serve |
+| `npm run lint` / `typecheck` | ESLint / strict TS |
+| `npm run test` / `test:e2e` | Vitest unit + action tests / Playwright smoke |
+| `npm run seed` / `db:push` | Seed catalog / push schema |
 
-## Recent Updates
+## Architecture overview
 
-### October 2024
+```
+app/                     routes (RSC pages, API webhooks)
+  api/webhooks/stripe/   payment fulfillment (signature-verified, idempotent)
+actions/                 server actions — all identity from session (requireUser)
+  → zod-validated input → Prisma transaction → revalidatePath
+components/              shadcn/ui primitives + feature components
+lib/                     auth-guard, rate-limit, stripe, email
+prisma/                  schema + seed
+e2e/                     Playwright smoke tests
+```
 
-- Added **cart functionality**, including dynamic updates and order placement.
-- Introduced a **wishlist and comparison feature**, allowing users to wishlist and compare products.
-- Enhanced product actions with features like detecting cart inclusion and improving button states.
+**Security model:** every mutation derives the caller from the server session — no client-supplied `userId`s. Reviews are linked to `User` (edit/delete ownership enforced server-side). See `docs/` for ADRs.
 
-### November 2024
+## Environment variables
 
-- Added **category filters**, including sort-by options and a price slider.
-- Developed a **profile section** with full CRUD operations for profile data.
-- Introduced the **orders page** for viewing and managing user orders.
-
----
-
-## Installation
-
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/username/repository.git
-   cd repository
-   ```
-
-2. **Install dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**:
-   Create a `.env` file in the root directory with the necessary configuration.
-
-4. **Run the development server**:
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Access the app**:
-   Open your browser and navigate to `http://localhost:3000`.
-
----
-
-## Technologies Used
-
-- **Frontend**: Next.js, React
-- **Backend**: Node.js, Express
-- **Database**: MongoDB
-- **Authentication**: OAuth, JWT
-- **Styling**: Tailwind CSS
-
----
-
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes and push to your fork.
-4. Create a pull request with a detailed description.
-
----
+See [`.env.example`](.env.example). Only `DATABASE_URL` and `AUTH_SECRET` are required; payments/email degrade gracefully when absent.
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-## Contact
-
-For inquiries, open an issue or reach out to the maintainer at [akhtar.farhan779@gmail.com](mailto:akhtar.farhan779@gmail.com).
+MIT — see [LICENSE](LICENSE).

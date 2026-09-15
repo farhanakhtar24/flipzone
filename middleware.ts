@@ -11,6 +11,7 @@ const protectedRoutes = [
   PAGE_ROUTES.WISHLIST,
   PAGE_ROUTES.COMPARE,
   "/checkout",
+  "/admin",
 ];
 
 export default async function middleware(request: NextRequest) {
