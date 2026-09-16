@@ -1,11 +1,14 @@
 "use client";
+import { moveToCart } from "@/actions/cart.action";
 import { removeWishlistItem } from "@/actions/wishlist.action";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import Spinner from "@/components/ui/spinner";
+import { useCartDrawer } from "@/context/CartDrawerContext";
 import { useToast } from "@/hooks/use-toast";
 import { IWishlistItemWithProduct } from "@/interfaces/actionInterface";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
+import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
@@ -16,6 +19,7 @@ type WishlistItemCardProps = {
 
 const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
   const { toast } = useToast();
+  const { setOpen } = useCartDrawer();
 
   const { thumbnail, title, price, discountPercentage } = item.product;
   const formattedPrice = priceFormatter(price);
@@ -23,6 +27,7 @@ const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
   const originalPrice = originalPriceGetter(price, discountPercentage || 0);
 
   const [loading, setLoading] = useState(false);
+  const [moving, setMoving] = useState(false);
 
   const handleDelete = async () => {
     setLoading(true);
@@ -45,6 +50,25 @@ const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
         variant: "success",
       });
     }
+  };
+
+  const handleMoveToCart = async () => {
+    setMoving(true);
+    const { message, error } = await moveToCart({ productId: item.product.id });
+    setMoving(false);
+
+    if (error) {
+      toast({
+        title: message,
+        description: error,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (message) {
+      toast({ title: message, variant: "success" });
+    }
+    setOpen(true);
   };
 
   return (
@@ -72,8 +96,31 @@ const WishlistItemCard = ({ item }: WishlistItemCardProps) => {
           )}
         </div>
       </div>
-      <div className="flex w-full items-center justify-center">
-        <Button variant="destructive" className="w-fit" onClick={handleDelete}>
+      <div className="flex w-full items-center justify-center gap-2">
+        <Button
+          variant="default"
+          className="flex-1"
+          onClick={handleMoveToCart}
+          disabled={moving || loading}
+        >
+          {moving ? (
+            <div className="h-4 w-4">
+              <Spinner className="text-white" />
+            </div>
+          ) : (
+            <>
+              <ShoppingCart className="mr-1 h-4 w-4" />
+              Move to cart
+            </>
+          )}
+        </Button>
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={handleDelete}
+          disabled={moving || loading}
+          aria-label="Remove from wishlist"
+        >
           {loading ? (
             <div className="h-5 w-5">
               <Spinner className="text-white" />

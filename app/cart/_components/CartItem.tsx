@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
-import { updateCartItemQuantity } from "@/actions/cart.action";
+import React, { useState } from "react";
+import { saveForLater, updateCartItemQuantity } from "@/actions/cart.action";
 import RatingBox from "@/components/RatingBox/RatingBox";
+import { Button } from "@/components/ui/button";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { IcartItemWithProduct } from "@/interfaces/actionInterface";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
+import { Bookmark } from "lucide-react";
 import Image from "next/image";
 import { QuantitySelectorInputs, RemoveItemButton } from "./CartButtons";
 
@@ -16,6 +18,7 @@ type Props = {
 const CartItem = ({ item }: Props) => {
   const { toast } = useToast();
   const { product, quantity, id: cartItemId } = item;
+  const [isSaving, setIsSaving] = useState(false);
 
   let { title, thumbnail, price, discountPercentage, stock, rating } = product;
 
@@ -49,6 +52,22 @@ const CartItem = ({ item }: Props) => {
     }
   };
 
+  const handleSaveForLater = async () => {
+    setIsSaving(true);
+    const { message, error } = await saveForLater({ cartItemId });
+    setIsSaving(false);
+
+    if (error) {
+      toast({
+        title: message,
+        description: error,
+        variant: "destructive",
+      });
+    } else if (message) {
+      toast({ title: message, variant: "success" });
+    }
+  };
+
   return (
     <CardContent className="flex w-full flex-col gap-3 p-6">
       <div className="flex flex-col gap-5 md:flex-row">
@@ -78,16 +97,28 @@ const CartItem = ({ item }: Props) => {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <QuantitySelectorInputs
           quantity={quantity}
           handleQuantityUpdate={handleQuantityUpdate}
           stock={stock}
         />
-        <RemoveItemButton
-          handleQuantityUpdate={handleQuantityUpdate}
-          quantity={quantity}
-        />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveForLater}
+            disabled={isSaving}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Bookmark className="mr-1 h-4 w-4" />
+            Save for later
+          </Button>
+          <RemoveItemButton
+            handleQuantityUpdate={handleQuantityUpdate}
+            quantity={quantity}
+          />
+        </div>
       </div>
     </CardContent>
   );
