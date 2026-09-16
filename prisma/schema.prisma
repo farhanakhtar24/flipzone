@@ -47,6 +47,28 @@ model User {
   comparison Comparison? // User can have one comparison
   reviews    Review[] // User can author many reviews
   addresses  Address[]
+  reviewVotes ReviewVote[] // Helpful/not-helpful votes cast by the user
+  stockAlerts StockAlert[] // Back-in-stock subscriptions
+}
+
+model StockAlert {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+
+  // Relationships
+  userId    String  @db.ObjectId
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model RateLimit {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  key     String   @unique // e.g. "login:<ip>" or "signup:<email>"
+  hits    Int      @default(0)
+  resetAt DateTime // window end; counter resets after this instant
 }
 
 model Account {
@@ -103,6 +125,7 @@ model Product {
   reviews         Review[] // Updated to use the new Review model
   wishlistItems   WishlistItem[] // New relationship with WishlistItem model
   comparisonItems ComparisonItem[] // New relationship with ComparisonItem model
+  stockAlerts     StockAlert[]
 
   meta MetaData?
 }
@@ -116,10 +139,14 @@ model Review {
   reviewerEmail String
 
   // Relationships
-  productId  String  @db.ObjectId
-  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  reviewerId String? @db.ObjectId
-  reviewer   User?   @relation(fields: [reviewerId], references: [id], onDelete: SetNull)
+  productId  String       @db.ObjectId
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewerId String?      @db.ObjectId
+  reviewer   User?        @relation(fields: [reviewerId], references: [id], onDelete: SetNull)
+  votes      ReviewVote[]
+  // Note: (productId, reviewerId) uniqueness is enforced in action code —
+  // a partial unique index isn't expressible here, and guest-seeded reviews
+  // with reviewerId=null would collide on a plain @@unique.
 }
 
 model Wishlist {
@@ -141,6 +168,22 @@ model WishlistItem {
   // Relationships
   wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
   product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+}
+
+model ReviewVote {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  helpful   Boolean // true = helpful, false = not helpful
+  createdAt DateTime @default(now())
+
+  // Relationships
+  reviewId String @db.ObjectId
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
 }
 
 model Comparison {
@@ -162,6 +205,8 @@ model ComparisonItem {
   // Relationships
   comparison Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
   product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([comparisonId, productId])
 }
 
 // Other existing models remain unchanged
@@ -194,6 +239,8 @@ model CartItem {
   cart      Cart    @relation(fields: [cartId], references: [id])
   productId String  @db.ObjectId
   product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
 }
 
 model Address {
@@ -234,6 +281,7 @@ model Order {
   status                OrderStatus @default(PENDING)
   stripeSessionId       String?     @unique
   stripePaymentIntentId String?
+  discountTotal         Int?        // Amount discounted by promo code (dollars), from Stripe total_details
   shippingName          String?
   shippingLine1         String?
   shippingLine2         String?
@@ -258,6 +306,8 @@ model ProductCategory {
   product    Product  @relation(fields: [productId], references: [id])
   categoryId String   @db.ObjectId
   category   Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([productId, categoryId])
 }
 
 // Custom types for better structure
