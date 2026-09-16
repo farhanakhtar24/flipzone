@@ -1,37 +1,21 @@
+import { db } from "@/db";
+
 /**
- * Simple in-memory sliding-window rate limiter for server actions.
- * Suitable for single-instance deployments (Vercel serverless functions
- * are ephemeral, so this is best-effort; swap for Upstash Ratelimit when
- * a Redis instance is available).
+ * Mongo-backed sliding-window rate limiter. Persists across serverless
+ * invocations and instances (unlike an in-process Map), which makes the
+ * auth brute-force protection actually hold on Vercel/self-hosted fleets.
+ *
+ * Fixed window per key: first hit starts a window of `windowMs`; hits are
+ * counted until `resetAt`, then the counter resets. Document per key, so
+ * a single upsert with `$inc` is atomic — no lost updates under concurrency.
  */
-
-type RateLimitEntry = {
-  timestamps: number[];
-};
-
-const store = new Map<string, RateLimitEntry>();
-
-// Periodically clean up stale entries to avoid memory leaks in long-lived servers.
-const CLEANUP_INTERVAL_MS = 60_000;
-let lastCleanup = Date.now();
-
-const cleanup = (windowMs: number) => {
-  const now = Date.now();
-  if (now - lastCleanup < CLEANUP_INTERVAL_MS) return;
-  lastCleanup = now;
-  const cutoff = now - windowMs;
-  store.forEach((entry, key) => {
-    entry.timestamps = entry.timestamps.filter((t: number) => t > cutoff);
-    if (entry.timestamps.length === 0) store.delete(key);
-  });
-};
 
 export type RateLimitResult = {
   success: boolean;
   remaining: number;
 };
 
-export const rateLimit = ({
+export const rateLimit = async ({
   key,
   limit,
   windowMs,
@@ -39,22 +23,25 @@ export const rateLimit = ({
   key: string;
   limit: number;
   windowMs: number;
-}): RateLimitResult => {
-  cleanup(windowMs);
-
+}): Promise<RateLimitResult> => {
   const now = Date.now();
-  const cutoff = now - windowMs;
-  const entry = store.get(key) ?? { timestamps: [] };
+  const resetAt = new Date(now + windowMs);
 
-  entry.timestamps = entry.timestamps.filter((t) => t > cutoff);
+  // If the window already expired, reset the counter and window atomically.
+  await db.rateLimit.updateMany({
+    where: { key, resetAt: { lt: new Date(now) } },
+    data: { hits: 0, resetAt },
+  });
 
-  if (entry.timestamps.length >= limit) {
-    store.set(key, entry);
+  // Increment the hit count, creating the record on first use.
+  const entry = await db.rateLimit.upsert({
+    where: { key },
+    create: { key, hits: 1, resetAt },
+    update: { hits: { increment: 1 } },
+  });
+
+  if (entry.hits > limit) {
     return { success: false, remaining: 0 };
   }
-
-  entry.timestamps.push(now);
-  store.set(key, entry);
-
-  return { success: true, remaining: limit - entry.timestamps.length };
+  return { success: true, remaining: limit - entry.hits };
 };

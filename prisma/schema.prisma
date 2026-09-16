@@ -69,6 +69,8 @@ model RateLimit {
   key     String   @unique // e.g. "login:<ip>" or "signup:<email>"
   hits    Int      @default(0)
   resetAt DateTime // window end; counter resets after this instant
+
+  @@index([key, resetAt])
 }
 
 model Account {

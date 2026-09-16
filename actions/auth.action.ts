@@ -32,7 +32,7 @@ export const loginWithCreds = async (values: z.infer<typeof LoginSchema>) => {
 
   const { email, password } = validatedFields.data;
 
-  const { success } = rateLimit({
+  const { success } = await rateLimit({
     key: `login:${email.toLowerCase()}`,
     limit: 5,
     windowMs: 60_000,
@@ -68,7 +68,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   const { email, password, name } = validatedFields.data;
   const normalizedEmail = email.toLowerCase();
 
-  const { success } = rateLimit({
+  const { success } = await rateLimit({
     key: `signup:${normalizedEmail}`,
     limit: 5,
     windowMs: 60_000,
