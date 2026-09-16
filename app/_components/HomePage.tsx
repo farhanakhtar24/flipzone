@@ -85,9 +85,11 @@ const RailSkeleton = () => (
 type Props = {
   categories: Category[];
   rails: HomeRails | null;
+  cartIds: string[];
+  wishlistIds: string[];
 };
 
-const HomePage = ({ categories, rails }: Props) => {
+const HomePage = ({ categories, rails, cartIds, wishlistIds }: Props) => {
   const categoryCounts = new Map(categories.map((c) => [c.name, c]));
 
   return (
@@ -159,6 +161,8 @@ const HomePage = ({ categories, rails }: Props) => {
               title="Top deals — up to 50% off"
               products={rails.deals}
               viewAllHref={`${PAGE_ROUTES.PRODUCTS}?discountPercentage=25&sortBy=discountPercentage:desc`}
+              cartIds={cartIds}
+              wishlistIds={wishlistIds}
             />
           </section>
         ) : (
@@ -171,13 +175,15 @@ const HomePage = ({ categories, rails }: Props) => {
             title="Bestsellers"
             products={rails.bestsellers}
             viewAllHref={`${PAGE_ROUTES.PRODUCTS}?sortBy=rating:desc`}
+            cartIds={cartIds}
+            wishlistIds={wishlistIds}
           />
         ) : (
           <RailSkeleton />
         )}
 
         {/* Recently viewed (renders only when the guest has history) */}
-        <RecentlyViewedRail />
+        <RecentlyViewedRail cartIds={cartIds} wishlistIds={wishlistIds} />
 
         {/* Personalized recommendations */}
         {rails ? (
@@ -185,6 +191,8 @@ const HomePage = ({ categories, rails }: Props) => {
             title="Picked for you"
             products={rails.recommended}
             viewAllHref={PAGE_ROUTES.PRODUCTS}
+            cartIds={cartIds}
+            wishlistIds={wishlistIds}
           />
         ) : (
           <RailSkeleton />
@@ -196,6 +204,8 @@ const HomePage = ({ categories, rails }: Props) => {
             title="New arrivals"
             products={rails.newArrivals}
             viewAllHref={`${PAGE_ROUTES.PRODUCTS}?sortBy=createdAt:desc`}
+            cartIds={cartIds}
+            wishlistIds={wishlistIds}
           />
         ) : (
           <RailSkeleton />

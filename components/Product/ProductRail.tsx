@@ -1,19 +1,27 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ProductsCard from "@/components/Product/ProductsCard";
-import { IproductWithCartStatus } from "@/interfaces/actionInterface";
+import { Product } from "@prisma/client";
 
 type Props = {
   title: string;
-  products: IproductWithCartStatus[];
+  products: Product[];
   viewAllHref?: string;
+  cartIds?: string[];
+  wishlistIds?: string[];
 };
 
 /**
  * A horizontally scrolling product rail (bestsellers, deals, related, …).
  * Cards get a fixed width so the rail scrolls instead of wrapping.
  */
-const ProductRail = ({ title, products, viewAllHref }: Props) => {
+const ProductRail = ({
+  title,
+  products,
+  viewAllHref,
+  cartIds = [],
+  wishlistIds = [],
+}: Props) => {
   if (products.length === 0) return null;
 
   return (
@@ -42,7 +50,11 @@ const ProductRail = ({ title, products, viewAllHref }: Props) => {
             className="w-[220px] shrink-0 snap-start sm:w-[240px]"
             role="listitem"
           >
-            <ProductsCard product={product} />
+            <ProductsCard
+              product={product}
+              isInCart={cartIds.includes(product.id)}
+              isWishlisted={wishlistIds.includes(product.id)}
+            />
           </div>
         ))}
       </div>

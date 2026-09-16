@@ -4,21 +4,23 @@ import { useEffect, useState } from "react";
 import { getProductsByIds } from "@/actions/product.action";
 import ProductRail from "@/components/Product/ProductRail";
 import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
-import { IproductWithCartStatus } from "@/interfaces/actionInterface";
+import { Product } from "@prisma/client";
 import { PAGE_ROUTES } from "@/routes";
 
 type Props = {
   /** Product id currently being viewed (PDP) — excluded from the rail. */
   excludeId?: string;
+  cartIds?: string[];
+  wishlistIds?: string[];
 };
 
 /**
  * Recently-viewed rail backed by localStorage. Fetches product data for the
  * stored ids and renders nothing when the list is empty (first visit).
  */
-const RecentlyViewedRail = ({ excludeId }: Props) => {
+const RecentlyViewedRail = ({ excludeId, cartIds, wishlistIds }: Props) => {
   const ids = useRecentlyViewed(excludeId);
-  const [products, setProducts] = useState<IproductWithCartStatus[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +43,8 @@ const RecentlyViewedRail = ({ excludeId }: Props) => {
       title="Recently viewed"
       products={products}
       viewAllHref={PAGE_ROUTES.PRODUCTS}
+      cartIds={cartIds}
+      wishlistIds={wishlistIds}
     />
   );
 };

@@ -11,13 +11,15 @@ import Link from "next/link";
 import { originalPriceGetter, priceFormatter } from "@/util/helper";
 import { Star } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { IproductWithCartStatus } from "@/interfaces/actionInterface";
+import { Product } from "@prisma/client";
 
 type Props = {
-  product: IproductWithCartStatus;
+  product: Product;
+  isInCart?: boolean;
+  isWishlisted?: boolean;
 };
 
-const ProductsCard = ({ product }: Props) => {
+const ProductsCard = ({ product, isInCart = false, isWishlisted = false }: Props) => {
   const {
     thumbnail,
     title,
@@ -27,8 +29,6 @@ const ProductsCard = ({ product }: Props) => {
     stock,
     brand,
     id,
-    isInCart,
-    isWishlisted,
   } = product;
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);

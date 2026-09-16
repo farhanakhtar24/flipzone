@@ -2,6 +2,7 @@ import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
 import ProductPage from "./_components/ProductPage";
 import { getProductById, getRelatedProducts } from "@/actions/product.action";
+import { getCartAndWishlistIds } from "@/actions/user-status.action";
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import ProductRail from "@/components/Product/ProductRail";
@@ -31,7 +32,13 @@ const page = async ({ params }: Props) => {
     notFound();
   }
 
-  const { data: related } = await getRelatedProducts(id, 8);
+  const [{ data: related }, statusRes] = await Promise.all([
+    getRelatedProducts(id, 8),
+    getCartAndWishlistIds(),
+  ]);
+
+  const cartIds = statusRes.data?.cartIds ?? [];
+  const wishlistIds = statusRes.data?.wishlistIds ?? [];
 
   return (
     <Wrapper>
@@ -45,9 +52,15 @@ const page = async ({ params }: Props) => {
               title="Related products"
               products={related}
               viewAllHref={PAGE_ROUTES.PRODUCTS}
+              cartIds={cartIds}
+              wishlistIds={wishlistIds}
             />
           )}
-          <RecentlyViewedRail excludeId={id} />
+          <RecentlyViewedRail
+            excludeId={id}
+            cartIds={cartIds}
+            wishlistIds={wishlistIds}
+          />
         </div>
       </div>
     </Wrapper>

@@ -1,4 +1,5 @@
 import { getAllProducts } from "@/actions/product.action";
+import { getCartAndWishlistIds } from "@/actions/user-status.action";
 import Wrapper from "@/components/Wrapper/Wrapper";
 import React from "react";
 import ProductGrid from "./_components/ProductGrid";
@@ -64,7 +65,10 @@ const page = async ({ searchParams }: Props) => {
     );
   }
 
-  const { data, error, message, totalCount } = await getAllProducts(filters);
+  const [{ data, error, message, totalCount }, statusRes] = await Promise.all([
+    getAllProducts(filters),
+    getCartAndWishlistIds(),
+  ]);
 
   if (error || !data) {
     return (
@@ -75,6 +79,9 @@ const page = async ({ searchParams }: Props) => {
       </Wrapper>
     );
   }
+
+  const cartIds = statusRes.data?.cartIds ?? [];
+  const wishlistIds = statusRes.data?.wishlistIds ?? [];
 
   const total = totalCount ?? data.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -141,7 +148,11 @@ const page = async ({ searchParams }: Props) => {
             <TaggedFilters />
 
             <div className="mt-4">
-              <ProductGrid products={data} />
+              <ProductGrid
+                products={data}
+                cartIds={cartIds}
+                wishlistIds={wishlistIds}
+              />
             </div>
 
             <Pagination currentPage={currentPage} totalPages={totalPages} />

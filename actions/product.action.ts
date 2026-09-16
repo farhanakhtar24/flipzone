@@ -7,7 +7,7 @@ import {
 import { requireUser, unauthorizedResponse } from "@/lib/auth-guard";
 import { serverErrorResponse } from "@/lib/auth-guard";
 import { AddToCartSchema } from "@/schemas/cart";
-import { Prisma } from "@prisma/client";
+import { Prisma, Product } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 // Sort fields that are safe to expose to the client
@@ -32,7 +32,7 @@ export const getAllProducts = async (
     page?: number;
     pageSize?: number;
   },
-): Promise<ApiResponse<IproductWithCartStatus[]> & { totalCount?: number }> => {
+): Promise<ApiResponse<Product[]> & { totalCount?: number }> => {
   const session = await requireUser();
   if (!session) return unauthorizedResponse();
 
@@ -103,52 +103,20 @@ export const getAllProducts = async (
         ? Math.min(Math.floor(filters.pageSize), 48)
         : 24;
 
-    const include = {
-      cartItems: {
-        where: {
-          cart: {
-            userId,
-          },
-        },
-        select: {
-          id: true,
-        },
-      },
-      wishlistItems: {
-        where: {
-          wishlist: {
-            userId,
-          },
-        },
-        select: {
-          id: true,
-        },
-      },
-    };
-
     const [products, totalCount] = await Promise.all([
       db.product.findMany({
         where,
         orderBy,
-        include,
         ...(page && { skip: (page - 1) * pageSize, take: pageSize }),
       }),
       db.product.count({ where }),
     ]);
 
-    const productsWithCartStatus = products.map(
-      ({ cartItems, wishlistItems, ...product }) => ({
-        ...product,
-        isInCart: cartItems.length > 0,
-        isWishlisted: wishlistItems.length > 0,
-      }),
-    );
-
     return {
       statusCode: 200,
       success: true,
       message: "Products fetched successfully.",
-      data: productsWithCartStatus,
+      data: products,
       totalCount,
     };
   } catch (error) {
@@ -160,40 +128,19 @@ export const getAllProducts = async (
 /** Fetch several products by id (e.g. recently-viewed list), keeping input order. */
 export const getProductsByIds = async (
   ids: string[],
-): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+): Promise<ApiResponse<Product[]>> => {
   const session = await requireUser();
   if (!session) return unauthorizedResponse();
-
-  const userId = session.user.id;
 
   try {
     const products = await db.product.findMany({
       where: { id: { in: ids } },
-      include: {
-        cartItems: {
-          where: { cart: { userId } },
-          select: { id: true },
-        },
-        wishlistItems: {
-          where: { wishlist: { userId } },
-          select: { id: true },
-        },
-      },
     });
 
-    const byId = new Map(
-      products.map(({ cartItems, wishlistItems, ...p }) => [
-        p.id,
-        {
-          ...p,
-          isInCart: cartItems.length > 0,
-          isWishlisted: wishlistItems.length > 0,
-        },
-      ]),
-    );
+    const byId = new Map(products.map((p) => [p.id, p]));
     const ordered = ids
       .map((id) => byId.get(id))
-      .filter(Boolean) as IproductWithCartStatus[];
+      .filter(Boolean) as (typeof products)[number][];
 
     return {
       statusCode: 200,
@@ -214,11 +161,9 @@ export const getProductsByIds = async (
 export const getRelatedProducts = async (
   productId: string,
   limit = 8,
-): Promise<ApiResponse<IproductWithCartStatus[]>> => {
+): Promise<ApiResponse<Product[]>> => {
   const session = await requireUser();
   if (!session) return unauthorizedResponse();
-
-  const userId = session.user.id;
 
   try {
     const product = await db.product.findUnique({
@@ -250,19 +195,11 @@ export const getRelatedProducts = async (
       take: limit * 3,
       include: {
         categories: { include: { category: true } },
-        cartItems: {
-          where: { cart: { userId } },
-          select: { id: true },
-        },
-        wishlistItems: {
-          where: { wishlist: { userId } },
-          select: { id: true },
-        },
       },
     });
 
     const scored = candidates
-      .map(({ cartItems, wishlistItems, categories, ...p }) => {
+      .map(({ categories, ...p }) => {
         const sharedLeaves = categories.filter((pc) =>
           leafSlugs.includes(pc.category.name),
         ).length;
@@ -274,8 +211,6 @@ export const getRelatedProducts = async (
             : 0;
         return {
           ...p,
-          isInCart: cartItems.length > 0,
-          isWishlisted: wishlistItems.length > 0,
           score: sharedLeaves * 3 + brandBoost + priceBoost + (p.rating ?? 0) / 10,
         };
       })
@@ -503,10 +438,10 @@ export const getProductById = async (
 };
 
 export interface HomeRails {
-  deals: IproductWithCartStatus[];
-  bestsellers: IproductWithCartStatus[];
-  newArrivals: IproductWithCartStatus[];
-  recommended: IproductWithCartStatus[];
+  deals: Product[];
+  bestsellers: Product[];
+  newArrivals: Product[];
+  recommended: Product[];
 }
 
 /**
@@ -522,47 +457,22 @@ export const getHomeRails = async (
 
   const userId = session.user.id;
 
-  const statusInclude = {
-    cartItems: {
-      where: { cart: { userId } },
-      select: { id: true },
-    },
-    wishlistItems: {
-      where: { wishlist: { userId } },
-      select: { id: true },
-    },
-  };
-
-  const mapWithStatus = (
-    rows: Array<
-      Prisma.ProductGetPayload<{ include: typeof statusInclude }>
-    >,
-  ): IproductWithCartStatus[] =>
-    rows.map(({ cartItems, wishlistItems, ...p }) => ({
-      ...p,
-      isInCart: cartItems.length > 0,
-      isWishlisted: wishlistItems.length > 0,
-    }));
-
   try {
     const [deals, bestsellers, newArrivals, favorites] = await Promise.all([
       db.product.findMany({
         where: { discountPercentage: { gte: 25 }, stock: { gte: 1 } },
         orderBy: { discountPercentage: "desc" },
         take: 10,
-        include: statusInclude,
       }),
       db.product.findMany({
         where: { stock: { gte: 1 } },
         orderBy: [{ rating: "desc" }],
         take: 10,
-        include: statusInclude,
       }),
       db.product.findMany({
         where: { stock: { gte: 1 } },
         orderBy: { createdAt: "desc" },
         take: 10,
-        include: statusInclude,
       }),
       // Categories the user engaged with. Two flat queries instead of a single
       // relation-OR: over MongoDB, `product: { orderItems: { some... } } OR
@@ -596,10 +506,10 @@ export const getHomeRails = async (
           })(),
     ]);
 
-    let recommended: IproductWithCartStatus[] = [];
+    let recommended: Product[] = [];
     const favoriteCategoryIds = favorites.map((f) => f.categoryId);
     if (favoriteCategoryIds.length > 0) {
-      const rows = await db.product.findMany({
+      recommended = await db.product.findMany({
         where: {
           stock: { gte: 1 },
           id: { notIn: recentIds },
@@ -607,12 +517,10 @@ export const getHomeRails = async (
         },
         orderBy: { rating: "desc" },
         take: 10,
-        include: statusInclude,
       });
-      recommended = mapWithStatus(rows);
     }
     if (recommended.length === 0) {
-      recommended = mapWithStatus(bestsellers);
+      recommended = bestsellers;
     }
 
     return {
@@ -620,9 +528,9 @@ export const getHomeRails = async (
       success: true,
       message: "Home rails fetched successfully.",
       data: {
-        deals: mapWithStatus(deals),
-        bestsellers: mapWithStatus(bestsellers),
-        newArrivals: mapWithStatus(newArrivals),
+        deals,
+        bestsellers,
+        newArrivals,
         recommended,
       },
     };
