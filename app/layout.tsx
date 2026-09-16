@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import SessionContext from "@/context/SessionContext";
+import CartDrawerProvider from "@/context/CartDrawerContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NextTopLoader from "nextjs-toploader";
 import Navbar from "@/components/Navbar/Navbar";
+import CartDrawer from "@/components/Cart/CartDrawer";
 import Footer from "@/components/Footer/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
@@ -38,9 +40,12 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <NextTopLoader />
-            <Navbar />
-            <main className="min-h-[80vh] bg-background">{children}</main>
-            <Footer />
+            <CartDrawerProvider>
+              <Navbar />
+              <main className="min-h-[80vh] bg-background">{children}</main>
+              <Footer />
+              <CartDrawer />
+            </CartDrawerProvider>
             <Toaster />
           </ThemeProvider>
         </body>

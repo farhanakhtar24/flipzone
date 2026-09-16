@@ -8,6 +8,7 @@ import { useRouter } from "nextjs-toploader/app";
 import { wishlistItem } from "@/actions/wishlist.action";
 import { FiHeart } from "react-icons/fi";
 import { PAGE_ROUTES } from "@/routes";
+import { useCartDrawer } from "@/context/CartDrawerContext";
 
 type BuyNowButtonProps = {
   productId: string;
@@ -66,6 +67,7 @@ const AddToCartButton = ({
   setIsAddingToCart,
 }: AddingToCartProps) => {
   const { toast } = useToast();
+  const { setOpen } = useCartDrawer();
 
   const handleSubmit = async () => {
     if (productId) {
@@ -75,13 +77,14 @@ const AddToCartButton = ({
         productId,
       });
 
-      // raise a toast here
       if (error) {
         toast({
           title: message,
           description: error,
           variant: "destructive",
         });
+        setIsAddingToCart(false);
+        return;
       }
 
       if (message) {
@@ -91,6 +94,8 @@ const AddToCartButton = ({
         });
       }
 
+      // Open the mini-cart so the user sees what just landed in their bag.
+      setOpen(true);
       setIsAddingToCart(false);
     }
   };
