@@ -6,11 +6,16 @@ import SearchBar from "./SearchBar";
 import { PAGE_ROUTES } from "@/routes";
 import CategoryDropdown from "./CategoryDropdown";
 import { getUserById } from "@/actions/user.action";
+import { getNavbarCounts } from "@/actions/navbar-status.action";
 import ThemeToggle from "./ThemeToggle";
+import NavbarActions from "./NavbarActions";
 
 const Navbar = async () => {
   const session = await auth();
   const user = session?.user?.id ? await getUserById(session.user.id) : null;
+  const counts = session?.user
+    ? (await getNavbarCounts()).data
+    : { cartCount: 0, wishlistCount: 0 };
 
   return (
     <nav className="bg-background/95 sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -32,6 +37,12 @@ const Navbar = async () => {
             <CategoryDropdown />
           </div>
           <ThemeToggle />
+          {session?.user && (
+            <NavbarActions
+              cartCount={counts?.cartCount ?? 0}
+              wishlistCount={counts?.wishlistCount ?? 0}
+            />
+          )}
           {!session?.user ? (
             <Link href={PAGE_ROUTES.AUTH}>
               <Button>Login</Button>
